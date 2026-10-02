@@ -147,6 +147,7 @@ export default function SectionSkillMatrix() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedWiFilter, setSelectedWiFilter] = useState('ALL');
   const [viewMode, setViewMode] = useState<'grid' | 'focused'>('grid');
+  const [teamScope, setTeamScope] = useState<'all' | 'my_team'>('all');
   const [currentPage, setCurrentPage] = useState(1);
 
   // Filter WIs based on active department and selected W/I filter
@@ -155,13 +156,17 @@ export default function SectionSkillMatrix() {
     ? departmentWIs
     : departmentWIs.filter(w => w.code === selectedWiFilter);
 
+  // Subordinates of Chief Aruni (EMP002)
+  const myTeamIds = ['EMP001', 'EMP003', 'EMP011'];
+
   // Filter Employees based on department and search query
   const filteredEmployees = mockEmployees.filter(emp => {
     const matchesDept = emp.department === department;
     const matchesSearch = emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           emp.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           emp.role.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesDept && matchesSearch;
+    const matchesTeam = teamScope === 'all' || myTeamIds.includes(emp.id);
+    return matchesDept && matchesSearch && matchesTeam;
   });
 
   // Pagination for Employees
@@ -311,8 +316,31 @@ export default function SectionSkillMatrix() {
               </div>
             </div>
 
+            {/* Team Scope Filter */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">ขอบเขตบุคลากร</label>
+              <div className="flex bg-slate-200/70 p-1 rounded-xl">
+                <button
+                  onClick={() => { setTeamScope('all'); setCurrentPage(1); }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    teamScope === 'all' ? 'bg-white text-[#0a2540] shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  🌐 ทั้งหมด
+                </button>
+                <button
+                  onClick={() => { setTeamScope('my_team'); setCurrentPage(1); }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                    teamScope === 'my_team' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <Users size={13} /> ลูกทีมในดูแลของฉัน
+                </button>
+              </div>
+            </div>
+
             {/* Search Employee */}
-            <div className="space-y-1 flex-1 min-w-[200px]">
+            <div className="space-y-1 flex-1 min-w-[180px]">
               <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">ค้นหาบุคลากร</label>
               <div className="relative">
                 <Search size={14} className="absolute left-3 top-2.5 text-slate-400" />

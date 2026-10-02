@@ -1,3 +1,4 @@
+import { TrendingUp } from 'lucide-react';
 import React, { useState } from 'react';
 import { Plus, Search, Filter, CheckCircle, XCircle, BookOpen, User, Calendar, Award, Send, Edit, ArrowLeft, FileText, Check, History, Layers, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -48,6 +49,27 @@ const employeesList = [
   { name: 'นางสาวอรทัย ใฝ่รู้', id: 'EMP010', department: 'Engineering' },
   { name: 'นายกฤษณะ แสงทอง', id: 'EMP011', department: 'QC Section' },
   { name: 'นางสาววรรณา ดีเลิศ', id: 'EMP012', department: 'QC Section' }
+];
+
+const mockUpgradeRecords = [
+  {
+    id: 'APR-001', flowType: 'annual',
+    employee: 'นายสมชาย ใจดี', employeeId: 'EMP001', department: 'QC Section',
+    wi: 'QCW001-001', skillType: 'A - Circuit Connecting / Wire Harnessing',
+    currentLevel: 1, proposedLevel: 2,
+    reason: 'ปฏิบัติงานอิสระครบ 6 เดือน ไม่มีข้อบกพร่อง',
+    submittedBy: 'Chief เอกวิทย์',
+    submittedAt: '2026-10-01', status: 'pending',
+  },
+  {
+    id: 'APR-002', flowType: 'annual',
+    employee: 'นางสาวแนน สุขใจ', employeeId: 'EMP005', department: 'Engineering',
+    wi: 'ENG-M-001', skillType: 'B - Machine Operator / Testing Station Control',
+    currentLevel: 2, proposedLevel: 3,
+    reason: 'สามารถสอนพนักงานใหม่ OJT ได้ และช่วยแก้ปัญหาเครื่องจักร',
+    submittedBy: 'Admin (คุณสมชาย)',
+    submittedAt: '2026-10-02', status: 'pending',
+  }
 ];
 
 const expandedOJTRecords: OJTRecord[] = [
@@ -293,6 +315,7 @@ const ITEMS_PER_PAGE = 8;
 
 export default function Training() {
   const [records, setRecords] = useState<OJTRecord[]>(expandedOJTRecords);
+  const [upgradeRecords, setUpgradeRecords] = useState(mockUpgradeRecords);
   const [viewMode, setViewMode] = useState<'current' | 'history'>('current');
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -306,6 +329,27 @@ export default function Training() {
 
   // Inline Form State (No Popup Modal!)
   const [isFormOpen, setIsFormOpen] = useState(false);
+  
+  // Upgrade Form State
+  const [isUpgradeFormOpen, setIsUpgradeFormOpen] = useState(false);
+  const [upgradeForm, setUpgradeForm] = useState({
+    employee: employeesList[0].name,
+    employeeId: employeesList[0].id,
+    department: employeesList[0].department,
+    wi: masterWIs[0].code,
+    skillType: masterSkillTypes[masterWIs[0].types[0]],
+    currentLevel: '1',
+    proposedLevel: '2',
+    reason: '',
+  });
+
+  const handleUpgradeSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!upgradeForm.reason.trim()) return;
+    setIsUpgradeFormOpen(false);
+    showToast(`ส่งเรื่องขอเลื่อนระดับทักษะสำเร็จ (รอการอนุมัติ)`);
+  };
+
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const [form, setForm] = useState({
@@ -479,10 +523,10 @@ export default function Training() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-            <BookOpen className="text-[#0a2540]" /> แผนการฝึกอบรม (OJT)
+            <BookOpen className="text-[#0a2540]" /> ประเมินทักษะ & OJT
           </h1>
           <p className="text-slate-500 text-sm mt-1">
-            Chief บันทึกผลการทดสอบหลังอบรม ดึงโครงสร้างมาตรฐาน W/I จาก Master Data ส่งให้ Manager เลื่อน Skill Level 0 → 1
+            จัดการข้อมูล OJT (Level 0 → 1) และ ส่งเสนอขอเลื่อนระดับทักษะ (Level 1 → 3)
           </p>
         </div>
 
@@ -511,12 +555,20 @@ export default function Training() {
               </button>
             </div>
 
-            <button
-              onClick={handleOpenAddForm}
-              className="flex items-center gap-2 px-5 py-2.5 bg-[#0a2540] hover:bg-[#0d3060] text-white rounded-lg transition-colors font-semibold shadow-md text-sm"
-            >
-              <Plus size={18} /> บันทึกผล OJT ใหม่
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => { setIsUpgradeFormOpen(true); setIsFormOpen(false); }}
+                className="flex items-center gap-2 px-5 py-2.5 bg-purple-900 hover:bg-purple-950 text-white rounded-lg transition-colors font-semibold shadow-md text-sm"
+              >
+                <TrendingUp size={18} /> ขอเลื่อนระดับทักษะ (Level Upgrade)
+              </button>
+              <button
+                onClick={() => { handleOpenAddForm(); setIsUpgradeFormOpen(false); }}
+                className="flex items-center gap-2 px-5 py-2.5 bg-[#0a2540] hover:bg-[#0d3060] text-white rounded-lg transition-colors font-semibold shadow-md text-sm"
+              >
+                <Plus size={18} /> บันทึกผล OJT ใหม่
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -536,6 +588,124 @@ export default function Training() {
         </div>
       </div>
 
+            {/* INLINE FORM: Level Upgrade */}
+      {isUpgradeFormOpen && (
+        <div className="bg-white rounded-xl border-2 border-purple-500 shadow-xl overflow-hidden transition-all duration-300">
+          <div className="bg-purple-50 px-5 py-4 border-b border-purple-100 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-purple-900 flex items-center gap-2"><TrendingUp size={18} /> ยื่นเสนอเลื่อนระดับทักษะ (Level Upgrade)</h2>
+              <p className="text-xs text-purple-700">Chief ยื่นเรื่องขอเลื่อนระดับ Skill Level ให้พนักงาน โดยอ้างอิงให้ Manager พิจารณา</p>
+            </div>
+          </div>
+
+          <form onSubmit={handleUpgradeSubmit} className="p-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {/* Employee */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">พนักงาน <span className="text-red-500">*</span></label>
+                <select
+                  value={upgradeForm.employeeId}
+                  onChange={e => {
+                    const emp = employeesList.find(x => x.id === e.target.value);
+                    if (emp) setUpgradeForm({ ...upgradeForm, employee: emp.name, employeeId: emp.id, department: emp.department });
+                  }}
+                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-slate-50 font-semibold"
+                >
+                  {employeesList.map(emp => (
+                    <option key={emp.id} value={emp.id}>{emp.name} ({emp.department})</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* W/I */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">มาตรฐาน W/I <span className="text-red-500">*</span></label>
+                <select
+                  value={upgradeForm.wi}
+                  onChange={e => {
+                    const wi = masterWIs.find(w => w.code === e.target.value);
+                    setUpgradeForm({ ...upgradeForm, wi: e.target.value, skillType: wi ? masterSkillTypes[wi.types[0]] : '' });
+                  }}
+                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-slate-50 font-semibold"
+                >
+                  {masterWIs.map(w => <option key={w.code} value={w.code}>{w.code} — {w.name}</option>)}
+                </select>
+              </div>
+
+              {/* Skill Type */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">ประเภททักษะ (Skill Type) <span className="text-red-500">*</span></label>
+                <select
+                  value={upgradeForm.skillType}
+                  onChange={e => setUpgradeForm({ ...upgradeForm, skillType: e.target.value })}
+                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-slate-50 font-semibold"
+                >
+                  {Object.values(masterSkillTypes).map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Current Level */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Level ปัจจุบัน (Read-only)</label>
+                <select
+                  value={upgradeForm.currentLevel}
+                  onChange={e => setUpgradeForm({ ...upgradeForm, currentLevel: e.target.value })}
+                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm bg-slate-100 font-bold text-slate-600"
+                >
+                  {[0, 1, 2, 3].map(l => <option key={l} value={l}>Level {l}</option>)}
+                </select>
+              </div>
+
+              {/* Proposed Level */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Level ที่เสนอปรับ <span className="text-red-500">*</span></label>
+                <select
+                  value={upgradeForm.proposedLevel}
+                  onChange={e => setUpgradeForm({ ...upgradeForm, proposedLevel: e.target.value })}
+                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-slate-50 font-bold text-purple-900"
+                >
+                  {[0, 1, 2, 3].map(l => <option key={l} value={l}>Level {l}</option>)}
+                </select>
+              </div>
+
+              {/* Reason */}
+              <div className="space-y-2 md:col-span-3">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">
+                  เหตุผลและหลักฐานประกอบการเลื่อนระดับทักษะ <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  rows={3}
+                  required
+                  placeholder="อธิบายเหตุผล เช่น ปฏิบัติงานอิสระครบ 12 เดือน สามารถสอนพนักงานใหม่ได้ พร้อมแนบผลงาน Q1-Q4..."
+                  value={upgradeForm.reason}
+                  onChange={e => setUpgradeForm({ ...upgradeForm, reason: e.target.value })}
+                  className="w-full border border-slate-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-slate-50 resize-none text-slate-800"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200 mt-4">
+              <button
+                type="button"
+                onClick={() => setIsUpgradeFormOpen(false)}
+                className="px-5 py-2.5 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 font-semibold text-sm transition-colors"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="submit"
+                disabled={!upgradeForm.reason.trim()}
+                className="px-6 py-2.5 bg-purple-900 hover:bg-purple-950 text-white rounded-lg font-semibold text-sm transition-colors shadow-md flex items-center gap-2 disabled:opacity-40"
+              >
+                <TrendingUp size={16} /> ส่งเรื่องขออนุมัติ
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+      
       {/* INLINE FORM: Add / Edit OJT (No Popup Modal!) */}
       {isFormOpen && (
         <div className="bg-white rounded-xl border-2 border-blue-500 shadow-xl overflow-hidden transition-all duration-300">
@@ -1006,6 +1176,67 @@ export default function Training() {
             </button>
           </div>
         </div>
+      {/* UPGRADE TABLE SECTION */}
+      <div className="bg-white rounded-xl border border-purple-200 shadow-sm overflow-hidden mt-8">
+        <div className="p-4 border-b border-purple-200 bg-purple-50 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <TrendingUp size={16} className="text-purple-600" />
+            <span className="text-sm font-bold text-purple-900">
+              รายการขอเลื่อนระดับทักษะ (Level Upgrade 1 → 3) ที่รออนุมัติ
+            </span>
+          </div>
+          <span className="text-xs font-semibold text-purple-700">รวมทั้งหมด {upgradeRecords.filter(r => r.status === 'pending').length} รายการ</span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead>
+              <tr className="bg-purple-50/50 border-b border-purple-100 text-purple-800 font-bold text-xs uppercase tracking-wide">
+                <th className="px-4 py-3.5">รหัสคำขอ</th>
+                <th className="px-4 py-3.5">พนักงาน</th>
+                <th className="px-4 py-3.5 min-w-[280px]">W/I & Skill Type</th>
+                <th className="px-4 py-3.5 text-center">Level ปัจจุบัน → เสนอปรับ</th>
+                <th className="px-4 py-3.5">เหตุผล</th>
+                <th className="px-4 py-3.5 text-center">สถานะ</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {upgradeRecords.filter(r => r.status === 'pending').map(req => (
+                <tr key={req.id} className="hover:bg-purple-50/30 transition-colors">
+                  <td className="px-4 py-3 font-mono text-xs text-slate-500">{req.id}</td>
+                  <td className="px-4 py-3 font-bold text-slate-800">
+                    <div>{req.employee}</div>
+                    <div className="text-xs text-slate-400 font-normal">{req.employeeId} · {req.department}</div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="font-bold text-[#0a2540] text-xs bg-slate-100 px-2 py-0.5 rounded inline-block mb-1">{req.wi}</div>
+                    <div className="text-xs text-slate-600 font-medium truncate max-w-[250px]">{req.skillType}</div>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <div className="inline-flex items-center gap-1.5">
+                      <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-bold border border-slate-200">{req.currentLevel}</span>
+                      <span className="text-slate-400 font-bold">→</span>
+                      <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs font-bold border border-purple-200">{req.proposedLevel}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-xs text-slate-600 truncate max-w-[200px]" title={req.reason}>
+                    {req.reason}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border bg-amber-50 text-amber-700 border-amber-200">
+                      รออนุมัติจาก Manager
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {upgradeRecords.filter(r => r.status === 'pending').length === 0 && (
+                <tr><td colSpan={6} className="text-center py-8 text-slate-500">ไม่มีรายการรออนุมัติ</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       </div>
     </div>
   );

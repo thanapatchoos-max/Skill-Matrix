@@ -205,21 +205,7 @@ export default function Approvals() {
   const [actionModal, setActionModal] = useState<{ request: ApprovalRequest; action: 'approve' | 'reject' | 'return' } | null>(null);
   const [remark, setRemark] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-
-  // Inline Form State (No Popup Modal!)
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [newForm, setNewForm] = useState({
-    employee: 'นายสมชาย ใจดี',
-    employeeId: 'EMP001',
-    department: 'QC Section',
-    wi: masterWIs[0].code,
-    skillType: masterSkillTypesList[0],
-    currentLevel: '2',
-    proposedLevel: '3',
-    reason: '',
-  });
-
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+const [toastMessage, setToastMessage] = useState<string | null>(null);
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
@@ -252,30 +238,7 @@ export default function Approvals() {
     showToast(`ทำรายการ ${action === 'approve' ? 'อนุมัติ' : action === 'reject' ? 'ปฏิเสธ' : 'ส่งกลับ'} สำเร็จ`);
     setActiveTab('history');
   };
-
-  const handleNewSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newForm.employee || !newForm.reason.trim()) return;
-
-    const newReq: ApprovalRequest = {
-      id: `APR-${String(requests.length + 1).padStart(3, '0')}`,
-      flowType: 'annual',
-      employee: newForm.employee,
-      employeeId: newForm.employeeId,
-      department: newForm.department,
-      wi: newForm.wi,
-      skillType: newForm.skillType,
-      currentLevel: parseInt(newForm.currentLevel),
-      proposedLevel: parseInt(newForm.proposedLevel),
-      reason: newForm.reason,
-      submittedBy: 'นางสาวอรุณี รักดี (Chief)',
-      submittedAt: new Date().toISOString().slice(0, 10),
-      status: 'pending',
-    };
-    setRequests([newReq, ...requests]);
-    setIsFormOpen(false);
-    showToast(`ยื่นเสนอปรับ Grade ประจำปี (${newReq.id}) สำเร็จ`);
-  };
+;
 
   const LevelBadge = ({ level }: { level: number }) => (
     <span className={`inline-flex items-center text-xs font-bold px-2.5 py-1 rounded-full border ${LEVEL_COLOR[level]}`}>
@@ -286,7 +249,7 @@ export default function Approvals() {
   const FlowTypeBadge = ({ type }: { type: FlowType }) => (
     type === 'ojt'
       ? <span className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-700 font-bold px-2.5 py-1 rounded-full border border-blue-200"><GraduationCap size={12} /> OJT (Level 0→1)</span>
-      : <span className="inline-flex items-center gap-1 text-xs bg-purple-50 text-purple-700 font-bold px-2.5 py-1 rounded-full border border-purple-200"><TrendingUp size={12} /> ปรับ Grade ประจำปี</span>
+      : <span className="inline-flex items-center gap-1 text-xs bg-purple-50 text-purple-700 font-bold px-2.5 py-1 rounded-full border border-purple-200"><TrendingUp size={12} /> เลื่อนระดับทักษะ (Level Upgrade)</span>
   );
 
   const StatusBadge = ({ status }: { status: ApprovalStatus }) => {
@@ -317,18 +280,10 @@ export default function Approvals() {
             <CheckCircle className="text-[#0a2540]" /> การอนุมัติ (Approval Workflow)
           </h1>
           <p className="text-slate-500 text-sm mt-1">
-            รวม 2 วงจร: OJT (เลื่อน Level 0→1) และ ปรับ Grade ประจำปี — บันทึก Audit Trail ตาม ISO 17025
+            รวม 2 วงจร: OJT (เลื่อน Level 0→1) และ เลื่อนระดับทักษะ (Level Upgrade) — บันทึก Audit Trail ตาม ISO 17025
           </p>
         </div>
 
-        {!isFormOpen && (
-          <button
-            onClick={() => setIsFormOpen(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-[#0a2540] text-white rounded-lg hover:bg-[#0d3060] transition-colors font-semibold shadow-md text-sm"
-          >
-            <Plus size={18} /> เสนอปรับ Grade ประจำปี
-          </button>
-        )}
       </div>
 
       {/* Flow Explanation */}
@@ -338,150 +293,11 @@ export default function Approvals() {
           <div className="text-xs text-blue-700">Chief บันทึกผลทดสอบ (ทฤษฎี+ปฏิบัติ ≥80%) → ส่งขออนุมัติ → Manager Approve → ระบบปรับ Level อัตโนมัติ</div>
         </div>
         <div className="bg-purple-50/70 border border-purple-200 rounded-xl p-4">
-          <div className="flex items-center gap-2 font-bold text-purple-900 mb-1"><TrendingUp size={16} /> วงจรประจำปี — ปรับ Grade</div>
-          <div className="text-xs text-purple-700">Chief เสนอปรับ Grade พร้อมหลักฐาน (ปรับได้ทุก Level) → Manager ตรวจสอบ Approve → ระบบอัปเดต Skill</div>
+          <div className="flex items-center gap-2 font-bold text-purple-900 mb-1"><TrendingUp size={16} /> วงจรประจำปี — เลื่อนระดับทักษะ</div>
+          <div className="text-xs text-purple-700">Chief เสนอเลื่อนระดับทักษะ พร้อมหลักฐาน (ปรับได้ทุก Level) → Manager ตรวจสอบ Approve → ระบบอัปเดต Skill</div>
         </div>
       </div>
-
-      {/* INLINE FORM: เสนอปรับ Grade ประจำปี (No Popup Modal!) */}
-      {isFormOpen && (
-        <div className="bg-white rounded-xl border-2 border-purple-500 shadow-xl overflow-hidden transition-all duration-300">
-          <div className="bg-gradient-to-r from-[#0a2540] to-purple-900 text-white p-5 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button 
-                type="button" 
-                onClick={() => setIsFormOpen(false)} 
-                className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-slate-200"
-              >
-                <ArrowLeft size={20} />
-              </button>
-              <div>
-                <h2 className="text-lg font-bold">ยื่นเสนอปรับ Grade ประจำปี (Inline Form)</h2>
-                <p className="text-xs text-purple-200">Chief ยื่นข้อเสนอปรับระดับ Skill Level พนักงานพร้อมแนบหลักฐานอ้างอิงให้ Manager พิจารณา</p>
-              </div>
-            </div>
-            <button 
-              type="button" 
-              onClick={() => setIsFormOpen(false)} 
-              className="text-slate-300 hover:text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-white/10"
-            >
-              ยกเลิก / ปิดฟอร์ม
-            </button>
-          </div>
-
-          <form onSubmit={handleNewSubmit} className="p-6 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Employee */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">
-                  พนักงาน <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={newForm.employee}
-                  onChange={e => setNewForm({ ...newForm, employee: e.target.value })}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-slate-50 font-medium text-slate-800"
-                >
-                  <option value="นายสมชาย ใจดี">นายสมชาย ใจดี (EMP001) - QC Section</option>
-                  <option value="นางสาวอรุณี รักดี">นางสาวอรุณี รักดี (EMP002) - QC Section</option>
-                  <option value="นายกฤต พร้อมใจ">นายกฤต พร้อมใจ (EMP003) - QC Section</option>
-                  <option value="นายวิชัย เก่งดี">นายวิชัย เก่งดี (EMP004) - Engineering</option>
-                  <option value="นางสาวแนน สุขใจ">นางสาวแนน สุขใจ (EMP005) - Engineering</option>
-                </select>
-              </div>
-
-              {/* W/I */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">
-                  Work Instruction (W/I) <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={newForm.wi}
-                  onChange={e => setNewForm({ ...newForm, wi: e.target.value })}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-slate-50 font-bold text-slate-800"
-                >
-                  {masterWIs.map(w => (
-                    <option key={w.code} value={w.code}>{w.code} - {w.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Skill Type */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">
-                  Skill Type <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={newForm.skillType}
-                  onChange={e => setNewForm({ ...newForm, skillType: e.target.value })}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-slate-50 font-semibold text-slate-800"
-                >
-                  {masterSkillTypesList.map(st => (
-                    <option key={st} value={st}>{st}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Current Level */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Level ปัจจุบัน (Read-only)</label>
-                <select
-                  value={newForm.currentLevel}
-                  onChange={e => setNewForm({ ...newForm, currentLevel: e.target.value })}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm bg-slate-100 font-bold text-slate-600"
-                >
-                  {[0, 1, 2, 3].map(l => <option key={l} value={l}>{l} — {LEVEL_LABEL[l]}</option>)}
-                </select>
-              </div>
-
-              {/* Proposed Level */}
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Level ที่เสนอปรับ <span className="text-red-500">*</span></label>
-                <select
-                  value={newForm.proposedLevel}
-                  onChange={e => setNewForm({ ...newForm, proposedLevel: e.target.value })}
-                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-slate-50 font-bold text-purple-900"
-                >
-                  {[0, 1, 2, 3].map(l => <option key={l} value={l}>{l} — {LEVEL_LABEL[l]}</option>)}
-                </select>
-              </div>
-
-              {/* Reason */}
-              <div className="space-y-2 md:col-span-3">
-                <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">
-                  เหตุผลและหลักฐานประกอบการปรับ Grade <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  rows={3}
-                  required
-                  placeholder="อธิบายเหตุผล เช่น ปฏิบัติงานอิสระครบ 12 เดือน สามารถสอนพนักงานใหม่ได้ พร้อมแนบผลงาน Q1-Q4..."
-                  value={newForm.reason}
-                  onChange={e => setNewForm({ ...newForm, reason: e.target.value })}
-                  className="w-full border border-slate-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-slate-50 resize-none text-slate-800"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
-              <button
-                type="button"
-                onClick={() => setIsFormOpen(false)}
-                className="px-5 py-2.5 border border-slate-300 rounded-lg text-slate-600 hover:bg-slate-50 font-semibold text-sm transition-colors"
-              >
-                ยกเลิก
-              </button>
-              <button
-                type="submit"
-                disabled={!newForm.reason.trim()}
-                className="px-6 py-2.5 bg-purple-900 hover:bg-purple-950 text-white rounded-lg font-semibold text-sm transition-colors shadow-md flex items-center gap-2 disabled:opacity-40"
-              >
-                <Save size={16} /> ส่งคำขอเสนอปรับ Grade
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Stats Summary Bar */}
+{/* Stats Summary Bar */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: 'รออนุมัติทั้งหมด', value: pending.length, color: 'amber', icon: Clock },

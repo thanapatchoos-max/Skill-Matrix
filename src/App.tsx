@@ -12,6 +12,8 @@ import { CompareSkillMatrix } from './pages/CompareView';
 import { SettingsPage } from './pages/SettingsPage';
 import { PermissionsPage } from './pages/PermissionsPage';
 import { LoginPage } from './pages/LoginPage';
+import { StaffDashboard } from './pages/StaffDashboard';
+import { WILibrary } from './pages/WILibrary';
 import { Bell, LogOut, Settings as SettingsIcon } from 'lucide-react';
 
 function App() {
@@ -24,7 +26,13 @@ function App() {
   const handleLoginSuccess = (role: string) => {
     setUserRole(role);
     setIsLoggedIn(true);
-    setCurrentPage('dashboard');
+    if (role === 'staff') {
+      setCurrentPage('staff-dashboard');
+    } else if (role === 'manager') {
+      setCurrentPage('approvals');
+    } else {
+      setCurrentPage('dashboard');
+    }
   };
 
   const handleLogout = () => {
@@ -38,7 +46,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#f8f9fc] flex print:bg-white print:block">
-      <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
+      <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} userRole={userRole} />
       
       <main className="flex-1 ml-64 p-8 print:ml-0 print:p-0 print:block">
         {/* Top Header / Header right area */}
@@ -128,9 +136,11 @@ function App() {
         </div>
 
         {/* Page Content */}
+        {currentPage === 'staff-dashboard' && <StaffDashboard onNavigatePage={(page) => setCurrentPage(page)} />}
+        {currentPage === 'wi-library' && <WILibrary userRole={userRole} />}
         {currentPage === 'dashboard' && <Dashboard />}
         {currentPage === 'overview' && <SectionSkillMatrix />}
-        {currentPage === 'individual' && <IndividualSkillMatrix />}
+        {currentPage === 'individual' && <IndividualSkillMatrix userRole={userRole} />}
         {currentPage === 'compare' && <CompareSkillMatrix />}
         {currentPage === 'approvals' && <Approvals />}
         {currentPage === 'employees' && <EmployeeManagement />}

@@ -76,7 +76,7 @@ export function Reports() {
         const headers = ['Request ID', 'Type', 'Employee', 'Department', 'W/I Code', 'Skill Type', 'Before Level', 'After Level', 'Approved By', 'Date', 'ISO Status'];
         const rows = [
           ['APR-001', 'OJT (Level 0->1)', 'นายกฤต พร้อมใจ', 'QC Section', 'QCW001-001', 'A - Circuit Connecting', 0, 1, 'นายกฤต (Manager)', '2026-09-22', 'Passed Audit'],
-          ['APR-007', 'Annual Grade', 'นางสาวอรุณี รักดี', 'QC Section', 'QCW002-001', 'D - Data Analysis', 1, 2, 'นายกฤต (Manager)', '2026-09-19', 'Passed Audit'],
+          ['APR-007', 'Skill Upgrade', 'นางสาวอรุณี รักดี', 'QC Section', 'QCW002-001', 'D - Data Analysis', 1, 2, 'นายกฤต (Manager)', '2026-09-19', 'Passed Audit'],
           ['APR-008', 'OJT (Level 0->1)', 'นางสาวแนน สุขใจ', 'Engineering', 'ENG-M-002', 'C - Inspection Report', 0, 1, 'นายกฤต (Manager)', '2026-09-16', 'Passed Audit'],
         ];
         triggerCSVDownload(`ISO17025_Audit_Trail_Report_${filters.auditStartDate}_to_${filters.auditEndDate}.csv`, headers, rows);
@@ -500,7 +500,7 @@ export function Reports() {
                 {activePreview === 'audit' && (
                   <>
                     <tr><td className="p-3 font-mono">APR-001</td><td className="p-3">OJT (Level 0→1)</td><td className="p-3 font-bold">นายกฤต พร้อมใจ</td><td className="p-3">QC Section</td><td className="p-3 font-mono">QCW001-001</td><td className="p-3 text-center">0 → 1</td><td className="p-3">นายกฤต (Manager)</td><td className="p-3">2026-09-22</td><td className="p-3 text-center"><span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-bold">Passed Audit</span></td></tr>
-                    <tr><td className="p-3 font-mono">APR-007</td><td className="p-3">Annual Grade</td><td className="p-3 font-bold">นางสาวอรุณี รักดี</td><td className="p-3">QC Section</td><td className="p-3 font-mono">QCW002-001</td><td className="p-3 text-center">1 → 2</td><td className="p-3">นายกฤต (Manager)</td><td className="p-3">2026-09-19</td><td className="p-3 text-center"><span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-bold">Passed Audit</span></td></tr>
+                    <tr><td className="p-3 font-mono">APR-007</td><td className="p-3">Skill Upgrade</td><td className="p-3 font-bold">นางสาวอรุณี รักดี</td><td className="p-3">QC Section</td><td className="p-3 font-mono">QCW002-001</td><td className="p-3 text-center">1 → 2</td><td className="p-3">นายกฤต (Manager)</td><td className="p-3">2026-09-19</td><td className="p-3 text-center"><span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-bold">Passed Audit</span></td></tr>
                   </>
                 )}
                 {activePreview === 'ojt' && (
@@ -617,7 +617,7 @@ export function Reports() {
               {activePreview === 'audit' && (
                 <>
                   <tr className="border-b border-slate-300"><td className="p-2 border-r border-slate-300 font-mono">APR-001</td><td className="p-2 border-r border-slate-300">OJT (Level 0→1)</td><td className="p-2 border-r border-slate-300 font-bold">นายกฤต พร้อมใจ</td><td className="p-2 border-r border-slate-300">QC Section</td><td className="p-2 border-r border-slate-300 font-mono">QCW001-001</td><td className="p-2 border-r border-slate-300 text-center">Level 0 → 1</td><td className="p-2 border-r border-slate-300">นายกฤต (Manager)</td><td className="p-2 border-r border-slate-300">2026-09-22</td><td className="p-2 text-center font-bold text-emerald-800">PASSED</td></tr>
-                  <tr className="border-b border-slate-300"><td className="p-2 border-r border-slate-300 font-mono">APR-007</td><td className="p-2 border-r border-slate-300">Annual Grade</td><td className="p-2 border-r border-slate-300 font-bold">นางสาวอรุณี รักดี</td><td className="p-2 border-r border-slate-300">QC Section</td><td className="p-2 border-r border-slate-300 font-mono">QCW002-001</td><td className="p-2 border-r border-slate-300 text-center">Level 1 → 2</td><td className="p-2 border-r border-slate-300">นายกฤต (Manager)</td><td className="p-2 border-r border-slate-300">2026-09-19</td><td className="p-2 text-center font-bold text-emerald-800">PASSED</td></tr>
+                  <tr className="border-b border-slate-300"><td className="p-2 border-r border-slate-300 font-mono">APR-007</td><td className="p-2 border-r border-slate-300">Skill Upgrade</td><td className="p-2 border-r border-slate-300 font-bold">นางสาวอรุณี รักดี</td><td className="p-2 border-r border-slate-300">QC Section</td><td className="p-2 border-r border-slate-300 font-mono">QCW002-001</td><td className="p-2 border-r border-slate-300 text-center">Level 1 → 2</td><td className="p-2 border-r border-slate-300">นายกฤต (Manager)</td><td className="p-2 border-r border-slate-300">2026-09-19</td><td className="p-2 text-center font-bold text-emerald-800">PASSED</td></tr>
                 </>
               )}
               {activePreview === 'ojt' && (
