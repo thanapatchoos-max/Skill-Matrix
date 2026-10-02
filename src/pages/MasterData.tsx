@@ -227,12 +227,6 @@ export function MasterData() {
         {!isFormOpen && (
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setActiveTab(activeTab === 'wis' ? 'skillTypes' : 'wis')}
-              className="px-4 py-2.5 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg text-sm font-semibold transition-colors shadow-sm flex items-center gap-2"
-            >
-              <Layers size={16} /> {activeTab === 'wis' ? 'สลับดู Skill Types Master' : 'สลับดู Work Instructions'}
-            </button>
-            <button
               onClick={handleOpenAddForm}
               className="flex items-center gap-2 px-5 py-2.5 bg-[#0a2540] hover:bg-[#0d3060] text-white rounded-lg transition-colors font-semibold shadow-md text-sm"
             >

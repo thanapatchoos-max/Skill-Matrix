@@ -105,12 +105,13 @@ export function Reports() {
 
   // EXPORT PDF HANDLER (Trigger Print / PDF Preview)
   const handleExportPDF = (type: 'matrix' | 'audit' | 'ojt' | 'gap') => {
+    setActivePreview(type);
     setIsExporting(type + '_pdf');
     setTimeout(() => {
       setIsExporting(null);
-      showToast(`เตรียมเอกสาร PDF สำหรับพิมพ์/บันทึกแล้ว (กำลังเปิดหน้าต่างพิมพ์)`);
+      showToast(`เตรียมเอกสาร PDF มาตรฐาน ISO 17025 แล้ว (กำลังเปิดหน้าต่างพิมพ์)`);
       window.print();
-    }, 600);
+    }, 400);
   };
 
   return (
@@ -124,7 +125,7 @@ export function Reports() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
             <FileText className="text-[#0a2540]" /> รายงานและการส่งออกข้อมูล (Reports & Export Center)
@@ -136,7 +137,7 @@ export function Reports() {
       </div>
 
       {/* REPORT MODULES GRID (4 Practical Modules) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 print:hidden">
 
         {/* MODULE 1: SKILL MATRIX SUMMARY REPORT */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4 flex flex-col justify-between hover:border-blue-300 transition-all">
@@ -413,7 +414,7 @@ export function Reports() {
 
       {/* LIVE DATA PREVIEW PANEL (ตัวอย่างตารางข้อมูลก่อนส่งออกจริง) */}
       {activePreview && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-md p-5 space-y-4 animate-fadeIn">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-md p-5 space-y-4 animate-fadeIn print:hidden">
           <div className="flex items-center justify-between border-b border-slate-200 pb-3">
             <div className="flex items-center gap-2">
               <Eye className="text-blue-600" size={18} />
@@ -519,6 +520,142 @@ export function Reports() {
           </div>
         </div>
       )}
+
+      {/* DEDICATED PRINT TEMPLATE FOR HIGH-QUALITY PDF EXPORT (ISO 17025 AUDIT FORMAT) */}
+      <div className="hidden print:block font-sans text-slate-900 bg-white p-4 space-y-6">
+        {/* ISO 17025 Document Standard Header */}
+        <div className="border-2 border-slate-900 p-4 rounded-none space-y-3">
+          <div className="flex items-center justify-between border-b-2 border-slate-900 pb-3">
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900">THAI DAIHEN ELECTRIC CO., LTD.</h1>
+              <p className="text-xs font-semibold text-slate-700">WORKFORCE COMPETENCY & SKILL MATRIX MANAGEMENT SYSTEM</p>
+            </div>
+            <div className="text-right text-xs space-y-0.5 font-mono">
+              <div className="font-bold">Doc No: TDE-SKM-RPT-2026</div>
+              <div>Issue Date: {new Date().toISOString().slice(0, 10)}</div>
+              <div>ISO Standards: ISO 9001 / ISO 17025</div>
+            </div>
+          </div>
+
+          <div className="text-center pt-2">
+            <h2 className="text-lg font-bold uppercase tracking-wide underline">
+              {activePreview === 'matrix' ? 'Skill Matrix Competency Summary Report'
+               : activePreview === 'audit' ? 'Approval & Skill Upgrade Audit Trail Report'
+               : activePreview === 'ojt' ? 'OJT Training & Evaluation Official Record'
+               : 'Competency Gap & Risk Analysis Report'}
+            </h2>
+            <p className="text-xs text-slate-600 mt-1">
+              ขอบเขตข้อมูล: แผนก {filters.matrixDept === 'ALL' ? 'ทุกแผนก (All Sections)' : filters.matrixDept} | ปีงบประมาณ: {filters.matrixYear}
+            </p>
+          </div>
+        </div>
+
+        {/* Printable Data Table */}
+        <div className="border border-slate-900">
+          <table className="w-full text-xs text-left border-collapse">
+            <thead>
+              {activePreview === 'matrix' && (
+                <tr className="bg-slate-200 border-b border-slate-900 text-slate-900 font-bold">
+                  <th className="p-2 border-r border-slate-900">รหัสพนักงาน</th>
+                  <th className="p-2 border-r border-slate-900">ชื่อ-นามสกุล</th>
+                  <th className="p-2 border-r border-slate-900">แผนก</th>
+                  <th className="p-2 border-r border-slate-900">ตำแหน่ง</th>
+                  <th className="p-2 border-r border-slate-900 text-center">A: ต่อวงจร</th>
+                  <th className="p-2 border-r border-slate-900 text-center">B: คุมเครื่อง</th>
+                  <th className="p-2 border-r border-slate-900 text-center">C: ตรวจสอบ</th>
+                  <th className="p-2 border-r border-slate-900 text-center">D: วิเคราะห์</th>
+                  <th className="p-2 text-center">รวม (เต็ม 20)</th>
+                </tr>
+              )}
+              {activePreview === 'audit' && (
+                <tr className="bg-slate-200 border-b border-slate-900 text-slate-900 font-bold">
+                  <th className="p-2 border-r border-slate-900">Ref ID</th>
+                  <th className="p-2 border-r border-slate-900">ประเภทอนุมัติ</th>
+                  <th className="p-2 border-r border-slate-900">ชื่อพนักงาน</th>
+                  <th className="p-2 border-r border-slate-900">แผนก</th>
+                  <th className="p-2 border-r border-slate-900">มาตรฐาน W/I</th>
+                  <th className="p-2 border-r border-slate-900 text-center">ก่อน → หลัง</th>
+                  <th className="p-2 border-r border-slate-900">ผู้อนุมัติ</th>
+                  <th className="p-2 border-r border-slate-900">วันที่</th>
+                  <th className="p-2 text-center">Audit Result</th>
+                </tr>
+              )}
+              {activePreview === 'ojt' && (
+                <tr className="bg-slate-200 border-b border-slate-900 text-slate-900 font-bold">
+                  <th className="p-2 border-r border-slate-900">OJT ID</th>
+                  <th className="p-2 border-r border-slate-900">พนักงาน</th>
+                  <th className="p-2 border-r border-slate-900">แผนก</th>
+                  <th className="p-2 border-r border-slate-900">W/I Code</th>
+                  <th className="p-2 border-r border-slate-900">หัวข้อ Skill</th>
+                  <th className="p-2 border-r border-slate-900 text-center">ทฤษฎี (%)</th>
+                  <th className="p-2 border-r border-slate-900 text-center">ปฏิบัติ (%)</th>
+                  <th className="p-2 text-center">ผลการประเมิน</th>
+                </tr>
+              )}
+              {activePreview === 'gap' && (
+                <tr className="bg-slate-200 border-b border-slate-900 text-slate-900 font-bold">
+                  <th className="p-2 border-r border-slate-900">W/I Code</th>
+                  <th className="p-2 border-r border-slate-900">ชื่อขั้นตอนคู่มือ W/I</th>
+                  <th className="p-2 border-r border-slate-900">แผนก</th>
+                  <th className="p-2 border-r border-slate-900 text-center">คะแนนเฉลี่ย</th>
+                  <th className="p-2 border-r border-slate-900 text-center">จำนวน Trainer</th>
+                  <th className="p-2 border-r border-slate-900 text-center">ระดับความเสี่ยง</th>
+                  <th className="p-2">แผนพัฒนาทักษะเร่งด่วน</th>
+                </tr>
+              )}
+            </thead>
+            <tbody className="divide-y divide-slate-400 font-sans">
+              {activePreview === 'matrix' && (
+                <>
+                  <tr className="border-b border-slate-300"><td className="p-2 border-r border-slate-300 font-mono">EMP001</td><td className="p-2 border-r border-slate-300 font-bold">นายสมชาย ใจดี</td><td className="p-2 border-r border-slate-300">QC Section</td><td className="p-2 border-r border-slate-300">Inspector</td><td className="p-2 border-r border-slate-300 text-center">3</td><td className="p-2 border-r border-slate-300 text-center">2</td><td className="p-2 border-r border-slate-300 text-center">2</td><td className="p-2 border-r border-slate-300 text-center">1</td><td className="p-2 text-center font-bold">16 / 20</td></tr>
+                  <tr className="border-b border-slate-300"><td className="p-2 border-r border-slate-300 font-mono">EMP002</td><td className="p-2 border-r border-slate-300 font-bold">นางสาวอรุณี รักดี</td><td className="p-2 border-r border-slate-300">QC Section</td><td className="p-2 border-r border-slate-300">Supervisor</td><td className="p-2 border-r border-slate-300 text-center">3</td><td className="p-2 border-r border-slate-300 text-center">3</td><td className="p-2 border-r border-slate-300 text-center">3</td><td className="p-2 border-r border-slate-300 text-center">2</td><td className="p-2 text-center font-bold">20 / 20</td></tr>
+                  <tr className="border-b border-slate-300"><td className="p-2 border-r border-slate-300 font-mono">EMP003</td><td className="p-2 border-r border-slate-300 font-bold">นายกฤต พร้อมใจ</td><td className="p-2 border-r border-slate-300">QC Section</td><td className="p-2 border-r border-slate-300">Technician</td><td className="p-2 border-r border-slate-300 text-center">1</td><td className="p-2 border-r border-slate-300 text-center">1</td><td className="p-2 border-r border-slate-300 text-center">2</td><td className="p-2 border-r border-slate-300 text-center">0</td><td className="p-2 text-center font-bold">8 / 20</td></tr>
+                  <tr className="border-b border-slate-300"><td className="p-2 border-r border-slate-300 font-mono">EMP005</td><td className="p-2 border-r border-slate-300 font-bold">นางสาวแนน สุขใจ</td><td className="p-2 border-r border-slate-300">Engineering</td><td className="p-2 border-r border-slate-300">Calibration Eng</td><td className="p-2 border-r border-slate-300 text-center">0</td><td className="p-2 border-r border-slate-300 text-center">2</td><td className="p-2 border-r border-slate-300 text-center">3</td><td className="p-2 border-r border-slate-300 text-center">2</td><td className="p-2 text-center font-bold">18 / 20</td></tr>
+                  <tr className="border-b border-slate-300"><td className="p-2 border-r border-slate-300 font-mono">EMP008</td><td className="p-2 border-r border-slate-300 font-bold">นายสมศักดิ์ มั่นคง</td><td className="p-2 border-r border-slate-300">Production</td><td className="p-2 border-r border-slate-300">Assembly Tech</td><td className="p-2 border-r border-slate-300 text-center">2</td><td className="p-2 border-r border-slate-300 text-center">2</td><td className="p-2 border-r border-slate-300 text-center">0</td><td className="p-2 border-r border-slate-300 text-center">0</td><td className="p-2 text-center font-bold">14 / 20</td></tr>
+                </>
+              )}
+              {activePreview === 'audit' && (
+                <>
+                  <tr className="border-b border-slate-300"><td className="p-2 border-r border-slate-300 font-mono">APR-001</td><td className="p-2 border-r border-slate-300">OJT (Level 0→1)</td><td className="p-2 border-r border-slate-300 font-bold">นายกฤต พร้อมใจ</td><td className="p-2 border-r border-slate-300">QC Section</td><td className="p-2 border-r border-slate-300 font-mono">QCW001-001</td><td className="p-2 border-r border-slate-300 text-center">Level 0 → 1</td><td className="p-2 border-r border-slate-300">นายกฤต (Manager)</td><td className="p-2 border-r border-slate-300">2026-09-22</td><td className="p-2 text-center font-bold text-emerald-800">PASSED</td></tr>
+                  <tr className="border-b border-slate-300"><td className="p-2 border-r border-slate-300 font-mono">APR-007</td><td className="p-2 border-r border-slate-300">Annual Grade</td><td className="p-2 border-r border-slate-300 font-bold">นางสาวอรุณี รักดี</td><td className="p-2 border-r border-slate-300">QC Section</td><td className="p-2 border-r border-slate-300 font-mono">QCW002-001</td><td className="p-2 border-r border-slate-300 text-center">Level 1 → 2</td><td className="p-2 border-r border-slate-300">นายกฤต (Manager)</td><td className="p-2 border-r border-slate-300">2026-09-19</td><td className="p-2 text-center font-bold text-emerald-800">PASSED</td></tr>
+                </>
+              )}
+              {activePreview === 'ojt' && (
+                <>
+                  <tr className="border-b border-slate-300"><td className="p-2 border-r border-slate-300 font-mono">OJT-001</td><td className="p-2 border-r border-slate-300 font-bold">นายกฤต พร้อมใจ</td><td className="p-2 border-r border-slate-300">QC Section</td><td className="p-2 border-r border-slate-300 font-mono">QCW001-001</td><td className="p-2 border-r border-slate-300">A - Circuit Connecting</td><td className="p-2 border-r border-slate-300 text-center">85%</td><td className="p-2 border-r border-slate-300 text-center">88%</td><td className="p-2 text-center font-bold text-emerald-800">PASSED</td></tr>
+                  <tr className="border-b border-slate-300"><td className="p-2 border-r border-slate-300 font-mono">OJT-003</td><td className="p-2 border-r border-slate-300 font-bold">นายสมศักดิ์ มั่นคง</td><td className="p-2 border-r border-slate-300">Production</td><td className="p-2 border-r border-slate-300 font-mono">PROD-010-01</td><td className="p-2 border-r border-slate-300">A - Circuit Connecting</td><td className="p-2 border-r border-slate-300 text-center">88%</td><td className="p-2 border-r border-slate-300 text-center">90%</td><td className="p-2 text-center font-bold text-emerald-800">PASSED</td></tr>
+                </>
+              )}
+              {activePreview === 'gap' && (
+                <>
+                  <tr className="border-b border-slate-300"><td className="p-2 border-r border-slate-300 font-mono font-bold">PROD-030-01</td><td className="p-2 border-r border-slate-300 font-bold">การพ่นสีอบความร้อนรองพื้น</td><td className="p-2 border-r border-slate-300">Production</td><td className="p-2 border-r border-slate-300 text-center">1.8 / 3.0</td><td className="p-2 border-r border-slate-300 text-center font-bold text-red-700">0 คน</td><td className="p-2 border-r border-slate-300 text-center font-bold text-red-700">HIGH RISK</td><td className="p-2">เร่งสร้าง Trainer ประจำสเตชันพ่นสีอบความร้อน</td></tr>
+                  <tr className="border-b border-slate-300"><td className="p-2 border-r border-slate-300 font-mono font-bold">QCW004-001</td><td className="p-2 border-r border-slate-300 font-bold">การทดสอบวัดค่าการสูญเสียไร้ภาระ</td><td className="p-2 border-r border-slate-300">QC Section</td><td className="p-2 border-r border-slate-300 text-center">2.0 / 3.0</td><td className="p-2 border-r border-slate-300 text-center">1 คน</td><td className="p-2 border-r border-slate-300 text-center font-bold text-amber-700">MEDIUM RISK</td><td className="p-2">จัดสอบซ่อมทฤษฎี OJT ภายใน Q3</td></tr>
+                </>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Formal ISO Audit Signatures Section */}
+        <div className="grid grid-cols-3 gap-6 pt-10 text-xs">
+          <div className="border border-slate-400 p-3 text-center space-y-8">
+            <div className="font-bold">Prepared By (ผู้จัดทำรายงาน)</div>
+            <div className="border-b border-slate-400 w-3/4 mx-auto"></div>
+            <div>(......................................................)<br/><span className="text-[10px] text-slate-600">เจ้าหน้าที่ฝ่าย HR / Training System</span></div>
+          </div>
+          <div className="border border-slate-400 p-3 text-center space-y-8">
+            <div className="font-bold">Reviewed By (ผู้ทบทวน)</div>
+            <div className="border-b border-slate-400 w-3/4 mx-auto"></div>
+            <div>(......................................................)<br/><span className="text-[10px] text-slate-600">หัวหน้าส่วนงาน / Section Manager</span></div>
+          </div>
+          <div className="border border-slate-400 p-3 text-center space-y-8">
+            <div className="font-bold">Approved By (ผู้อนุมัติ ISO 17025)</div>
+            <div className="border-b border-slate-400 w-3/4 mx-auto"></div>
+            <div>(......................................................)<br/><span className="text-[10px] text-slate-600">ผู้จัดการฝ่ายทรัพยากรบุคคล / HR Manager</span></div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
+

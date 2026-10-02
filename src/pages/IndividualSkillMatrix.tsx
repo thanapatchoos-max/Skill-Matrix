@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { User, Award, BookOpen, Download, ChevronDown, CheckCircle, Search, Layers, ChevronLeft, ChevronRight, FileSpreadsheet, BarChart2 } from 'lucide-react';
+import { User, Award, BookOpen, Download, ChevronDown, CheckCircle, Search, Layers, ChevronLeft, ChevronRight, FileSpreadsheet, BarChart2, Compass, Target } from 'lucide-react';
+import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip as RechartsTooltip } from 'recharts';
 
 interface WIMaster {
   code: string;
@@ -133,7 +134,8 @@ export default function IndividualSkillMatrix() {
   const [selectedDept, setSelectedDept] = useState('QC Section');
   const [selectedEmpId, setSelectedEmpId] = useState('EMP001');
   const [selectedWiFilter, setSelectedWiFilter] = useState('ALL');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [radarCategory, setRadarCategory] = useState<'overall' | 'hard' | 'soft'>('overall');
 
   // Department Employees List
   const deptEmployees = mockEmployeesProfiles.filter(e => e.department === selectedDept);
@@ -146,6 +148,36 @@ export default function IndividualSkillMatrix() {
   const activeWIs = selectedWiFilter === 'ALL'
     ? deptWIs
     : deptWIs.filter(w => w.code === selectedWiFilter);
+
+  // Filter skills based on Radar category pill selection
+  const activeSkillHeaders = skillTypesHeader.filter(st => {
+    if (radarCategory === 'hard') return ['A', 'B', 'C'].includes(st.code);
+    if (radarCategory === 'soft') return ['D', 'E'].includes(st.code);
+    return true; // overall
+  });
+
+  // Calculate scores for active radar category
+  const radarData = activeSkillHeaders.map(st => {
+    let total = 0;
+    let count = 0;
+    deptWIs.forEach(w => {
+      const key = `${w.code}_${st.code}`;
+      if (emp.scores[key] !== undefined) {
+        total += emp.scores[key];
+        count++;
+      }
+    });
+    const avg = count > 0 ? Number((total / count).toFixed(1)) : 0;
+    // Score out of 3 scaled to 100
+    const scaledDone = Math.min(100, Math.round((avg / 3) * 100));
+    return {
+      subject: st.name,
+      code: `${st.code} - ${st.name.split(' ')[0]}`,
+      currentDone: scaledDone,
+      targetToBe: 100,
+      actualAvg: avg
+    };
+  });
 
   // Pagination for WIs
   const totalPages = Math.ceil(activeWIs.length / ITEMS_PER_PAGE);
@@ -318,6 +350,130 @@ export default function IndividualSkillMatrix() {
               <span className="font-semibold text-slate-700">{emp.joinedDate}</span>
             </div>
           </div>
+
+          {/* MY SKILLS RADAR CHART (ดีไซน์ตามตัวอย่างรูปภาพภาพอ้างอิง) */}
+          <div className="pt-4 border-t border-slate-200 space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                <Compass size={16} className="text-blue-600" /> Radar Chart วิเคราะห์ทักษะ (My Skills)
+              </h3>
+            </div>
+
+            {/* Interactive Filter Pills: Overall / Hard Skills / Soft Skills */}
+            <div className="flex items-center justify-center gap-1 bg-slate-100 p-1 rounded-full text-[11px] font-semibold">
+              <button
+                onClick={() => setRadarCategory('overall')}
+                className={`px-3 py-1 rounded-full transition-all ${radarCategory === 'overall' ? 'bg-blue-600 text-white font-bold shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+              >
+                Overall
+              </button>
+              <button
+                onClick={() => setRadarCategory('hard')}
+                className={`px-3 py-1 rounded-full transition-all ${radarCategory === 'hard' ? 'bg-blue-600 text-white font-bold shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+              >
+                Hards skills
+              </button>
+              <button
+                onClick={() => setRadarCategory('soft')}
+                className={`px-3 py-1 rounded-full transition-all ${radarCategory === 'soft' ? 'bg-blue-600 text-white font-bold shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+              >
+                Soft skills
+              </button>
+            </div>
+
+            {/* Legend Markers */}
+            <div className="flex items-center justify-around text-[10px] text-slate-600 font-semibold pt-1">
+              <span className="flex items-center gap-1 text-indigo-600">
+                <span className="w-2.5 h-2.5 rounded-full bg-indigo-600 inline-block shadow-sm"></span> Current Done (ทักษะปัจจุบัน)
+              </span>
+              <span className="flex items-center gap-1 text-slate-700">
+                <span className="w-2.5 h-2.5 rounded-full bg-slate-800 inline-block shadow-sm"></span> Target (เป้าหมาย 3.0)
+              </span>
+            </div>
+
+            {/* Chart Graphic Area: Render Radar Chart for Overall/Hard skills, and Circular Progress Ring Gauge Cards for Soft Skills */}
+            {radarCategory === 'soft' ? (
+              <div className="py-4 space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  {radarData.map(st => (
+                    <div key={st.code} className="bg-slate-50 rounded-xl p-3 border border-slate-200 text-center space-y-2 flex flex-col items-center justify-between shadow-xs">
+                      <div className="text-xs font-bold text-slate-800 tracking-tight">{st.code}</div>
+                      
+                      {/* Circular Gauge Ring */}
+                      <div className="relative w-20 h-20 flex items-center justify-center">
+                        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                          <path
+                            className="text-slate-200"
+                            strokeWidth="3.5"
+                            stroke="currentColor"
+                            fill="none"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                          />
+                          <path
+                            className="text-indigo-600 transition-all duration-1000 ease-out"
+                            strokeDasharray={`${st.currentDone}, 100`}
+                            strokeWidth="3.5"
+                            strokeLinecap="round"
+                            stroke="currentColor"
+                            fill="none"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                          />
+                        </svg>
+                        <div className="absolute flex flex-col items-center justify-center">
+                          <span className="text-xs font-black text-slate-800">{st.actualAvg}</span>
+                          <span className="text-[9px] font-medium text-slate-500">/ 3.0</span>
+                        </div>
+                      </div>
+
+                      <div className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full">
+                        {st.currentDone}% Of Target
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="h-64 w-full pt-1">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart cx="50%" cy="50%" outerRadius="72%" data={radarData}>
+                    <PolarGrid stroke="#cbd5e1" strokeDasharray="3 3" />
+                    <PolarAngleAxis
+                      dataKey="code"
+                      tick={{ fill: '#334155', fontSize: 10, fontWeight: 'bold' }}
+                    />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 8, fill: '#64748b' }} />
+                    <Radar
+                      name="Target (เป้าหมาย 3.0)"
+                      dataKey="targetToBe"
+                      stroke="#475569"
+                      fill="#94a3b8"
+                      fillOpacity={0.15}
+                      strokeDasharray="4 4"
+                    />
+                    <Radar
+                      name="Current Done (ทักษะจริง)"
+                      dataKey="currentDone"
+                      stroke="#4338ca"
+                      fill="#6366f1"
+                      fillOpacity={0.45}
+                    />
+                    <RechartsTooltip
+                      contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', color: '#fff' }}
+                      itemStyle={{ color: '#818cf8', fontSize: '11px', fontWeight: 'bold' }}
+                      formatter={(value: any, name: any, item: any) => [
+                        `${item.payload.actualAvg} / 3.0 (คิดเป็น ${value}%)`,
+                        name
+                      ]}
+                    />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            <p className="text-[10px] text-slate-400 text-center italic">
+              *แสดงค่าเฉลี่ยทักษะ A-E ของ {emp.name} เปรียบเทียบเป้าหมายระดับ 3.0 (Master/Trainer)
+            </p>
+          </div>
         </div>
 
         {/* RIGHT MATRIX TABLE: Skill Types A, B, C, D, E (8.5 Columns) */}
@@ -476,17 +632,29 @@ export default function IndividualSkillMatrix() {
   );
 }
 
-// Level Badge with Score Bar matching exact UI screenshot design
+// Level Badge with Score Bar and Grade Level Name matching Approvals page
 function IndividualSkillPill({ level }: { level: number }) {
+  const levelLabels: Record<number, { text: string; grade: string; color: string; bg: string }> = {
+    3: { text: 'Trainer', grade: 'Level 3', color: 'text-indigo-700', bg: 'bg-indigo-50 border-indigo-200' },
+    2: { text: 'Independent', grade: 'Level 2', color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-200' },
+    1: { text: 'Supervision', grade: 'Level 1', color: 'text-amber-700', bg: 'bg-amber-50 border-amber-200' },
+    0: { text: 'Cannot', grade: 'Level 0', color: 'text-slate-400', bg: 'bg-slate-50 border-slate-200' },
+  };
+
+  const info = levelLabels[level] || levelLabels[0];
+
   if (level === 3) {
     return (
       <div className="flex flex-col items-center gap-1">
-        <span className="w-7 h-7 rounded-lg bg-slate-900 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+        <span className="w-7 h-7 rounded-lg bg-indigo-900 text-white font-bold text-xs flex items-center justify-center shadow-xs">
           3
         </span>
-        <div className="w-10 bg-slate-200 h-1.5 rounded-full overflow-hidden">
-          <div className="bg-slate-900 h-full w-full rounded-full" />
+        <div className="w-12 bg-slate-200 h-1.5 rounded-full overflow-hidden">
+          <div className="bg-indigo-900 h-full w-full rounded-full" />
         </div>
+        <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded border ${info.bg} ${info.color}`}>
+          {info.text}
+        </span>
       </div>
     );
   }
@@ -494,12 +662,15 @@ function IndividualSkillPill({ level }: { level: number }) {
   if (level === 2) {
     return (
       <div className="flex flex-col items-center gap-1">
-        <span className="w-7 h-7 rounded-lg bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+        <span className="w-7 h-7 rounded-lg bg-emerald-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
           2
         </span>
-        <div className="w-10 bg-slate-200 h-1.5 rounded-full overflow-hidden">
-          <div className="bg-blue-600 h-full w-2/3 rounded-full" />
+        <div className="w-12 bg-slate-200 h-1.5 rounded-full overflow-hidden">
+          <div className="bg-emerald-600 h-full w-2/3 rounded-full" />
         </div>
+        <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded border ${info.bg} ${info.color}`}>
+          {info.text}
+        </span>
       </div>
     );
   }
@@ -507,24 +678,30 @@ function IndividualSkillPill({ level }: { level: number }) {
   if (level === 1) {
     return (
       <div className="flex flex-col items-center gap-1">
-        <span className="w-7 h-7 rounded-lg bg-blue-500 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+        <span className="w-7 h-7 rounded-lg bg-amber-500 text-white font-bold text-xs flex items-center justify-center shadow-xs">
           1
         </span>
-        <div className="w-10 bg-slate-200 h-1.5 rounded-full overflow-hidden">
-          <div className="bg-blue-500 h-full w-1/3 rounded-full" />
+        <div className="w-12 bg-slate-200 h-1.5 rounded-full overflow-hidden">
+          <div className="bg-amber-500 h-full w-1/3 rounded-full" />
         </div>
+        <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded border ${info.bg} ${info.color}`}>
+          {info.text}
+        </span>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col items-center gap-1">
-      <span className="w-7 h-7 rounded-lg bg-slate-100 text-slate-400 font-bold text-xs border border-slate-200">
+      <span className="w-7 h-7 rounded-lg bg-slate-100 text-slate-400 font-bold text-xs border border-slate-200 flex items-center justify-center">
         0
       </span>
-      <div className="w-10 bg-slate-200 h-1.5 rounded-full overflow-hidden">
+      <div className="w-12 bg-slate-200 h-1.5 rounded-full overflow-hidden">
         <div className="bg-slate-300 h-full w-0" />
       </div>
+      <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded border ${info.bg} ${info.color}`}>
+        {info.text}
+      </span>
     </div>
   );
 }

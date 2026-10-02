@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   LayoutDashboard, Database, FileText, Target, Users, 
-  GraduationCap, Grid, BarChart2, Settings, ChevronDown, ChevronRight, CheckSquare
+  GraduationCap, Grid, BarChart2, Settings, ChevronDown, ChevronRight, CheckSquare, ShieldCheck
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -14,7 +14,7 @@ export default function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
   const [skillMatrixOpen, setSkillMatrixOpen] = useState(true);
 
   return (
-    <div className="w-64 bg-[#0a2540] text-slate-300 flex flex-col h-screen fixed left-0 top-0 overflow-y-auto">
+    <div className="w-64 bg-[#0a2540] text-slate-300 flex flex-col h-screen fixed left-0 top-0 overflow-y-auto print:hidden">
       <div className="p-4 border-b border-white/10 flex items-center gap-3 bg-[#081e36]">
         <div className="bg-white text-blue-700 font-bold px-2 py-1 rounded text-lg tracking-tighter">
           DAIHEN
@@ -63,6 +63,7 @@ export default function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
         <NavItem icon={GraduationCap} label="แผนการฝึกอบรม (OJT)" active={currentPage === 'training'} onClick={() => setCurrentPage('training')} />
         <NavItem icon={BarChart2} label="รายงาน (Reports)" active={currentPage === 'reports'} onClick={() => setCurrentPage('reports')} />
         <NavItem icon={Settings} label="ตั้งค่าระบบ" active={currentPage === 'settings'} onClick={() => setCurrentPage('settings')} />
+        <NavItem icon={ShieldCheck} label="สิทธิ์ & บทบาทผู้ใช้" active={currentPage === 'permissions'} onClick={() => setCurrentPage('permissions')} />
       </div>
 
       <div className="p-4 border-t border-white/10 mt-auto">
