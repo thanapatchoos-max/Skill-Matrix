@@ -1,237 +1,91 @@
-import React from 'react';
-import { Users, BarChart2, Award, Activity, CheckCircle2, AlertCircle } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { clsx } from 'clsx';
+﻿import React from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { Users, Activity, AlertTriangle, TrendingUp, BookOpen, Award, CheckCircle, Clock } from 'lucide-react';
 
-const barData = [
-  { name: 'Level 0', count: 22 },
-  { name: 'Level 1', count: 48 },
-  { name: 'Level 2', count: 58 },
-  { name: 'Level 3', count: 28 },
-];
-
-const lineData = [
-  { year: '2023', score: 1.32 },
-  { year: '2024', score: 1.55 },
-  { year: '2025', score: 1.72 },
-  { year: '2026', score: 1.82 },
+const mockTrend = [
+  { year: '2023', level1: 15, level2: 10, level3: 5 },
+  { year: '2024', level1: 20, level2: 15, level3: 8 },
+  { year: '2025', level1: 18, level2: 25, level3: 12 },
+  { year: '2026', level1: 10, level2: 30, level3: 20 },
 ];
 
 export default function Dashboard() {
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">Dashboard — ภาพรวมระบบ</h1>
+    <div className="p-6 max-w-7xl mx-auto space-y-6 pb-24 bg-slate-50 min-h-screen">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+          <Activity className="text-indigo-600" /> แดชบอร์ดผู้บริหาร (Executive Dashboard)
+        </h1>
+        <p className="text-slate-500 text-sm mt-1">ภาพรวมการบริหารจัดการทักษะและการผลิต (Overview of 8 Core Dashboards)</p>
       </div>
 
-      {/* Top 4 KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        <KPICard 
-          title="จำนวนพนักงานทั้งหมด" 
-          value="156" 
-          unit="คน" 
-          subtitle="ข้อมูล ณ วันที่ 23 พฤษภาคม 2567" 
-          icon={Users} 
-          iconColor="bg-blue-100 text-blue-600"
-        />
-        <KPICard 
-          title="เฉลี่ย Skill Level" 
-          value="1.82" 
-          subtitle="จากระดับ 0 - 3" 
-          icon={BarChart2} 
-          iconColor="bg-teal-100 text-teal-600"
-        />
-        <KPICard 
-          title="พนักงานระดับ 3" 
-          value="28" 
-          unit="คน" 
-          subtitle="คิดเป็น 17.95% ของพนักงานทั้งหมด" 
-          icon={Award} 
-          iconColor="bg-purple-100 text-purple-600"
-        />
-        <KPICard 
-          title="Capacity Utilization" 
-          value="72%" 
-          subtitle="เทียบกับ Capacity ทั้งหมด" 
-          icon={Activity} 
-          iconColor="bg-emerald-100 text-emerald-600"
-        />
-      </div>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* 8 Core Modules KPIs */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-2 text-indigo-600 mb-2"><Users size={16} /><span className="font-bold text-xs uppercase">กำลังการผลิตรวม (Capacity)</span></div>
+          <h2 className="text-2xl font-black text-slate-800">560 <span className="text-sm font-medium text-slate-500">Hrs/Day</span></h2>
+          <p className="text-xs text-slate-400 mt-1">ชั่วโมงการทำงานสูงสุดของทุกแผนก</p>
+        </div>
         
-        {/* Bar Chart */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-          <div className="flex items-center gap-2 mb-6">
-            <h3 className="text-base font-bold text-slate-700">Skill Distribution by Level</h3>
-            <div className="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[10px] text-slate-400 cursor-help">i</div>
-          </div>
-          <div className="text-xs text-slate-500 mb-2">จำนวน (คน)</div>
-          <div className="h-64">
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-2 text-emerald-600 mb-2"><Activity size={16} /><span className="font-bold text-xs uppercase">เปรียบเทียบภาระงาน (Plan vs Actual)</span></div>
+          <h2 className="text-2xl font-black text-slate-800">94.6%</h2>
+          <p className="text-xs text-slate-400 mt-1">อัตราภาระงานจริงของทั้งโรงงาน</p>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-2 text-rose-600 mb-2"><AlertTriangle size={16} /><span className="font-bold text-xs uppercase">อัตรางานเสีย/งานแก้ (NC/Rework)</span></div>
+          <h2 className="text-2xl font-black text-slate-800">1.2%</h2>
+          <p className="text-xs text-slate-400 mt-1">อัตรางานแก้ (อยู่ในเกณฑ์น้อยกว่า 5%)</p>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-2 text-amber-500 mb-2"><TrendingUp size={16} /><span className="font-bold text-xs uppercase">การประเมินทักษะ</span></div>
+          <h2 className="text-2xl font-black text-slate-800">3 <span className="text-sm font-medium text-slate-500">รอดำเนินการ</span></h2>
+          <p className="text-xs text-slate-400 mt-1">รายการเลื่อนระดับอัตโนมัติจากระบบ</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Skill Development Trend */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <h3 className="text-sm font-bold text-slate-800 mb-6 flex items-center gap-2"><Award size={16} className="text-indigo-500" /> แนวโน้มการพัฒนาทักษะรายปี (Yearly Trend)</h3>
+          <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={barData} margin={{ top: 20, right: 30, left: -20, bottom: 5 }}>
+              <BarChart data={mockTrend} margin={{ top: 5, right: 0, left: -20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                <Tooltip cursor={{fill: '#f1f5f9'}} />
-                <Bar dataKey="count" fill="#1d4ed8" barSize={40} radius={[4, 4, 0, 0]}>
-                  {/* labels on top of bars are usually rendered with a customized label, but keeping it simple here */}
-                </Bar>
+                <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+                <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
+                <Bar dataKey="level1" name="Level 1" fill="#94a3b8" radius={[4, 4, 0, 0]} stackId="a" />
+                <Bar dataKey="level2" name="Level 2" fill="#818cf8" radius={[4, 4, 0, 0]} stackId="a" />
+                <Bar dataKey="level3" name="Level 3" fill="#4f46e5" radius={[4, 4, 0, 0]} stackId="a" />
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex justify-center mt-4">
-            <div className="flex items-center gap-2 text-xs text-slate-600">
-              <span className="w-3 h-3 bg-blue-700 rounded-sm"></span> จำนวนพนักงาน (คน)
+        </div>
+
+        {/* Section Dashboard Placeholder */}
+        <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <h3 className="text-sm font-bold text-slate-800 mb-6 flex items-center gap-2"><BookOpen size={16} className="text-emerald-500" /> การฝึกอบรมและการพัฒนา (Training & Development)</h3>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
+              <div><p className="text-xs font-bold text-slate-700">คำขอรับการฝึกอบรม OJT (Level 0 &rarr; 1)</p><p className="text-[10px] text-slate-500">รอหัวหน้างาน (Chief) ตรวจสอบ</p></div>
+              <span className="font-black text-indigo-600 text-lg">7</span>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
+              <div><p className="text-xs font-bold text-slate-700">รอการอนุมัติจากผู้จัดการ</p><p className="text-[10px] text-slate-500">รอดำเนินการ Final Approve</p></div>
+              <span className="font-black text-amber-500 text-lg">4</span>
+            </div>
+            <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
+              <div><p className="text-xs font-bold text-slate-700">พนักงานที่ได้รับการเลื่อนระดับ (เดือนนี้)</p><p className="text-[10px] text-slate-500">พัฒนาทักษะสำเร็จแล้ว</p></div>
+              <span className="font-black text-emerald-600 text-lg">12</span>
             </div>
           </div>
         </div>
-
-        {/* Line Chart */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-          <div className="flex items-center gap-2 mb-6">
-            <h3 className="text-base font-bold text-slate-700">Skill Growth Trend 2023-2026</h3>
-            <div className="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center text-[10px] text-slate-400 cursor-help">i</div>
-          </div>
-          <div className="text-xs text-slate-500 mb-2">เฉลี่ย Skill Level</div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={lineData} margin={{ top: 20, right: 30, left: -20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} domain={[0, 3]} ticks={[0, 0.5, 1, 1.5, 2, 2.5, 3]} />
-                <Tooltip />
-                <Line type="linear" dataKey="score" stroke="#0d9488" strokeWidth={3} dot={{r: 5, fill: '#0d9488', strokeWidth: 0}} label={{ position: 'top', fill: '#475569', fontSize: 12, dy: -10 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex justify-center mt-4">
-            <div className="flex items-center gap-2 text-xs text-slate-600">
-              <span className="w-3 h-3 bg-teal-600 rounded-sm"></span> เฉลี่ย Skill Level
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      {/* Table: สถานะ Capacity ของแต่ละแผนก */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="p-5 border-b border-slate-100">
-          <h3 className="text-base font-bold text-slate-700">สถานะ Capacity ของแต่ละแผนก</h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-slate-50 text-slate-500 font-semibold text-xs border-b border-slate-200">
-              <tr>
-                <th className="px-6 py-4 text-center">แผนก</th>
-                <th className="px-6 py-4 text-center">Under Capacity ( &gt; -10% )</th>
-                <th className="px-6 py-4 text-center">Normal Capacity ( -10% ถึง +10% )</th>
-                <th className="px-6 py-4 text-center">Over Capacity ( &gt; +10% )</th>
-                <th className="px-6 py-4 text-center">Capacity Utilization</th>
-                <th className="px-6 py-4 text-center">สถานะ</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              <CapacityRow 
-                dept="QC" 
-                under={8} underPct="-11.4%" 
-                normal={56} normalPct="80.0%" 
-                over={6} overPct="+8.6%" 
-                utilization={88.6} 
-                status="ปกติ" statusType="normal" iconColor="text-blue-500"
-              />
-              <CapacityRow 
-                dept="Production" 
-                under={12} underPct="-15.0%" 
-                normal={68} normalPct="85.0%" 
-                over={0} overPct="0.0%" 
-                utilization={85.0} 
-                status="ปกติ" statusType="normal" iconColor="text-blue-500"
-              />
-              <CapacityRow 
-                dept="Engineering" 
-                under={5} underPct="-7.8%" 
-                normal={30} normalPct="46.9%" 
-                over={29} overPct="+45.3%" 
-                utilization={145.3} 
-                status="เกิน Capacity" statusType="over" iconColor="text-blue-500"
-              />
-            </tbody>
-          </table>
-        </div>
-        <div className="p-4 bg-slate-50/50 text-xs text-slate-400 flex items-center gap-2">
-          <div className="w-4 h-4 rounded-full border border-slate-300 flex items-center justify-center">i</div>
-          หมายเหตุ: คำนวณจากจำนวนพนักงานเทียบกับ Capacity ที่กำหนด
-        </div>
       </div>
     </div>
-  );
-}
-
-function KPICard({ title, value, unit, subtitle, icon: Icon, iconColor }: any) {
-  return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex flex-col justify-between h-full">
-      <div>
-        <div className="flex justify-between items-start mb-2">
-          <div className={clsx("w-12 h-12 rounded-full flex items-center justify-center mb-4", iconColor)}>
-            <Icon size={24} />
-          </div>
-        </div>
-        <div className="text-sm font-semibold text-slate-700 mb-1">{title}</div>
-        <div className="flex items-baseline gap-2 mb-2">
-          <span className="text-4xl font-bold text-slate-800">{value}</span>
-          {unit && <span className="text-base font-semibold text-slate-600">{unit}</span>}
-        </div>
-      </div>
-      <div className="text-xs text-slate-400">{subtitle}</div>
-    </div>
-  );
-}
-
-function CapacityRow({ dept, under, underPct, normal, normalPct, over, overPct, utilization, status, statusType, iconColor }: any) {
-  return (
-    <tr className="hover:bg-slate-50">
-      <td className="px-6 py-4">
-        <div className="flex items-center gap-3">
-          <div className={clsx("w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center", iconColor)}>
-            <Users size={16} />
-          </div>
-          <span className="font-bold text-slate-700">{dept}</span>
-        </div>
-      </td>
-      <td className="px-6 py-4 text-center">
-        <span className="font-semibold">{under} คน</span> <span className="text-emerald-500 text-xs">({underPct})</span>
-      </td>
-      <td className="px-6 py-4 text-center">
-        <span className="font-semibold">{normal} คน</span> <span className="text-emerald-500 text-xs">({normalPct})</span>
-      </td>
-      <td className="px-6 py-4 text-center">
-        <span className="font-semibold">{over} คน</span> <span className={over > 0 ? "text-red-500 text-xs" : "text-emerald-500 text-xs"}>({overPct})</span>
-      </td>
-      <td className="px-6 py-4 text-center">
-        <div className="flex items-center gap-3 justify-center">
-          <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
-            <div 
-              className={clsx("h-full rounded-full", utilization > 100 ? "bg-red-500" : "bg-emerald-500")}
-              style={{ width: `${Math.min(utilization, 100)}%` }}
-            ></div>
-          </div>
-          <span className="font-semibold">{utilization}%</span>
-        </div>
-      </td>
-      <td className="px-6 py-4 text-center">
-        {statusType === 'normal' ? (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-bold border border-emerald-100">
-            <CheckCircle2 size={14} /> {status}
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-600 text-xs font-bold border border-red-100">
-            <AlertCircle size={14} /> {status}
-          </span>
-        )}
-      </td>
-    </tr>
   );
 }

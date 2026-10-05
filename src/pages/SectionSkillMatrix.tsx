@@ -141,7 +141,7 @@ const mockEmployees: EmployeeSkill[] = [
 
 const ITEMS_PER_PAGE = 8;
 
-export default function SectionSkillMatrix() {
+export default function SectionSkillMatrix({ userRole = 'admin' }: { userRole?: string }) {
   const [department, setDepartment] = useState('QC Section');
   const [year, setYear] = useState('2026');
   const [searchQuery, setSearchQuery] = useState('');

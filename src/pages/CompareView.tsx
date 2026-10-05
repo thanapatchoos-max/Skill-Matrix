@@ -33,9 +33,13 @@ const masterCompareData: WIMaster[] = [
   { code: 'ENG-D-003', name: 'การจำลองและวิเคราะห์ความร้อนหม้อแปลง', department: 'Engineering', year25Score: 1.5, year26Score: 2.0, trainerCount: 1, riskStatus: 'medium', actionRecommendation: 'ส่งตัวแทนเข้าอบรมวิเคราะห์ความร้อนขั้นสูง' }
 ];
 
-export function CompareSkillMatrix() {
+export function CompareSkillMatrix({ userRole = 'admin' }: { userRole?: string }) {
+  const isStaff = userRole === 'staff' || userRole === 'clerk';
+  const isChief = userRole === 'chief';
+  const isManager = userRole === 'manager' || userRole === 'admin';
+
   const [compareMode, setCompareMode] = useState<'year' | 'department'>('year');
-  const [selectedDept, setSelectedDept] = useState('ALL');
+  const [selectedDept, setSelectedDept] = useState(isManager ? 'ALL' : 'QC Section');
 
   // Filter Data based on selected department
   const filteredData = selectedDept === 'ALL'

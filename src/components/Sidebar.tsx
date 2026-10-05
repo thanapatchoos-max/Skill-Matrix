@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   LayoutDashboard, Database, BarChart2, Users, 
-  GraduationCap, Grid, Settings, ChevronDown, ChevronRight, CheckSquare, ShieldCheck, UserCheck, BookOpen, Home
+  GraduationCap, Grid, Settings, ChevronDown, ChevronRight, CheckSquare, ShieldCheck, UserCheck, BookOpen, Home, ClipboardList, Activity, Award
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -16,8 +16,10 @@ export default function Sidebar({ currentPage, setCurrentPage, userRole = 'admin
 
   // Permission Checks per Role
   const isStaff = userRole === 'staff';
+  const isClerk = userRole === 'clerk';
   const isChief = userRole === 'chief';
   const isManager = userRole === 'manager';
+  const isViewer = userRole === 'viewer';
   const isAdmin = userRole === 'admin' || !userRole;
 
   return (
@@ -55,28 +57,43 @@ export default function Sidebar({ currentPage, setCurrentPage, userRole = 'admin
       </div>
 
       {/* Main Navigation Items */}
-      <div className="flex-1 py-3 flex flex-col gap-0.5">
+      <div className="flex-1 py-3 overflow-y-auto flex flex-col gap-0.5 custom-scrollbar">
         
-        {/* Staff Personal Dashboard */}
-        {isStaff && (
-          <NavItem 
-            icon={Home} 
-            label="แดชบอร์ดส่วนตัว" 
-            active={currentPage === 'staff-dashboard'} 
-            onClick={() => setCurrentPage('staff-dashboard')} 
-          />
+        {/* ============================== */}
+        {/* 1. OPERATIONS (ระบบปฏิบัติการรายวัน) */}
+        {/* ============================== */}
+        <div className="mt-2 mb-1 px-6 text-[10px] font-bold text-[#8fb4d8] uppercase tracking-wider">
+          ระบบปฏิบัติการ (Operations)
+        </div>
+
+        {/* Dashboard */}
+        {isStaff ? (
+          <NavItem icon={Home} label="แดชบอร์ดส่วนตัว" active={currentPage === 'staff-dashboard'} onClick={() => setCurrentPage('staff-dashboard')} />
+        ) : (
+          <NavItem icon={LayoutDashboard} label="แดชบอร์ด" active={currentPage === 'dashboard'} onClick={() => setCurrentPage('dashboard')} />
         )}
 
-        {/* Dashboard (Admin, Manager, Chief) */}
-        {!isStaff && (
-          <NavItem 
-            icon={LayoutDashboard} 
-            label="แดชบอร์ด" 
-            active={currentPage === 'dashboard'} 
-            onClick={() => setCurrentPage('dashboard')} 
-          />
+        {/* Working Record (All roles can view depending on visibility logic inside) */}
+        <NavItem icon={ClipboardList} label="บันทึกการทำงาน" active={currentPage === 'working-record'} onClick={() => setCurrentPage('working-record')} />
+
+        {/* Skill Evaluation (All roles) */}
+        <NavItem icon={Award} label="ระบบประเมินทักษะ" active={currentPage === 'evaluation'} onClick={() => setCurrentPage('evaluation')} />
+
+        {/* Training (Chief, Admin, Staff might need to see requests if we allowed, let's keep it available) */}
+        <NavItem icon={GraduationCap} label="ระบบจัดการการฝึกอบรม" active={currentPage === 'training'} onClick={() => setCurrentPage('training')} />
+
+        {/* Approvals (Manager, Admin) */}
+        {(isAdmin || isManager) && (
+          <NavItem icon={CheckSquare} label="การอนุมัติ (Approval)" active={currentPage === 'approvals'} onClick={() => setCurrentPage('approvals')} badge={6} />
         )}
-        
+
+        {/* ============================== */}
+        {/* 2. ANALYTICS (การวิเคราะห์ผล) */}
+        {/* ============================== */}
+        <div className="mt-4 mb-1 px-6 text-[10px] font-bold text-[#8fb4d8] uppercase tracking-wider">
+          การวิเคราะห์ (Analytics)
+        </div>
+
         {/* Skill Matrix Submenu */}
         <div>
           <button 
@@ -95,58 +112,49 @@ export default function Sidebar({ currentPage, setCurrentPage, userRole = 'admin
           
           {skillMatrixOpen && (
             <div className="bg-black/20 py-1.5 flex flex-col">
-              {/* Overview (Admin, Manager, Chief) */}
               {!isStaff && (
                 <SubNavItem label="ภาพรวม Skill Matrix" active={currentPage === 'overview'} onClick={() => setCurrentPage('overview')} />
               )}
-              
-              {/* Individual (All Roles: Admin, Manager, Chief, Staff) */}
-              <SubNavItem label={isStaff ? "ทักษะของฉัน (My Skills)" : "Individual Skill Matrix"} active={currentPage === 'individual'} onClick={() => setCurrentPage('individual')} />
-
-              {/* Compare (Admin, Manager) */}
-              {(isAdmin || isManager) && (
+              <SubNavItem label={isStaff ? "ทักษะของฉัน (My Skills)" : "ทักษะรายบุคคล (Individual)"} active={currentPage === 'individual'} onClick={() => setCurrentPage('individual')} />
+              {(isAdmin || isManager || isChief) && (
                 <SubNavItem label="เปรียบเทียบ Skill Matrix" active={currentPage === 'compare'} onClick={() => setCurrentPage('compare')} />
               )}
             </div>
           )}
         </div>
 
-        {/* W/I Library Knowledge Hub (All Roles) */}
+        {/* Workload & Capacity */}
+        {(isAdmin || isManager || isChief) && (
+          <NavItem icon={Activity} label="Workload & Capacity" active={currentPage === 'capacity'} onClick={() => setCurrentPage('capacity')} />
+        )}
+
+        {/* Reports */}
+        {(isAdmin || isManager || isChief) && (
+          <NavItem icon={BarChart2} label="รายงาน (Reports)" active={currentPage === 'reports'} onClick={() => setCurrentPage('reports')} />
+        )}
+
+        {/* ============================== */}
+        {/* 3. MANAGEMENT (จัดการระบบ) */}
+        {/* ============================== */}
+        <div className="mt-4 mb-1 px-6 text-[10px] font-bold text-[#8fb4d8] uppercase tracking-wider">
+          จัดการระบบ (Management)
+        </div>
+
         <NavItem icon={BookOpen} label="คลังคู่มือ W/I" active={currentPage === 'wi-library'} onClick={() => setCurrentPage('wi-library')} />
 
-        {/* Employee Management (Admin, Chief) */}
-        {(isAdmin || isChief) && (
+        {(isAdmin || isChief || isManager) && (
           <NavItem icon={Users} label="จัดการพนักงาน" active={currentPage === 'employees'} onClick={() => setCurrentPage('employees')} />
         )}
 
-        {/* Master Data (Admin, Manager, Chief) */}
         {(isAdmin || isManager || isChief) && (
           <NavItem icon={Database} label="จัดการข้อมูลพื้นฐาน" active={currentPage === 'master-data'} onClick={() => setCurrentPage('master-data')} />
         )}
 
-        {/* Approval Page (Admin, Manager) */}
-        {(isAdmin || isManager) && (
-          <NavItem icon={CheckSquare} label="การอนุมัติ (Approval)" active={currentPage === 'approvals'} onClick={() => setCurrentPage('approvals')} badge={6} />
-        )}
-
-        {/* OJT Training & Skill Assessment (Admin, Chief) */}
-        {(isAdmin || isChief) && (
-          <NavItem icon={GraduationCap} label="ประเมินทักษะ & OJT" active={currentPage === 'training'} onClick={() => setCurrentPage('training')} />
-        )}
-
-        {/* Reports (Admin, Manager) */}
-        {(isAdmin || isManager) && (
-          <NavItem icon={BarChart2} label="รายงาน (Reports)" active={currentPage === 'reports'} onClick={() => setCurrentPage('reports')} />
-        )}
-
-        {/* Settings (Admin) */}
-        {isAdmin && (
-          <NavItem icon={Settings} label="ตั้งค่าระบบ" active={currentPage === 'settings'} onClick={() => setCurrentPage('settings')} />
-        )}
-
-        {/* Permissions (Admin) */}
-        {isAdmin && (
-          <NavItem icon={ShieldCheck} label="สิทธิ์ & บทบาทผู้ใช้" active={currentPage === 'permissions'} onClick={() => setCurrentPage('permissions')} />
+        {(isAdmin) && (
+          <>
+            <NavItem icon={Settings} label="ตั้งค่าระบบ" active={currentPage === 'settings'} onClick={() => setCurrentPage('settings')} />
+            <NavItem icon={ShieldCheck} label="สิทธิ์ & บทบาทผู้ใช้" active={currentPage === 'permissions'} onClick={() => setCurrentPage('permissions')} />
+          </>
         )}
       </div>
 

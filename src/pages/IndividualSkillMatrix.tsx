@@ -131,7 +131,10 @@ const mockEmployeesProfiles: EmployeeProfile[] = [
 const ITEMS_PER_PAGE = 6;
 
 export default function IndividualSkillMatrix({ userRole = 'admin' }: { userRole?: string }) {
-  const isStaff = userRole === 'staff';
+    const isStaff = userRole === 'staff' || userRole === 'clerk';
+  const isChief = userRole === 'chief';
+  const isManager = userRole === 'manager' || userRole === 'admin';
+
 
   const [selectedDept, setSelectedDept] = useState('QC Section');
   const [selectedEmpId, setSelectedEmpId] = useState(isStaff ? 'EMP001' : 'EMP001');
@@ -291,7 +294,8 @@ export default function IndividualSkillMatrix({ userRole = 'admin' }: { userRole
                 <select
                   value={selectedEmpId}
                   onChange={e => { setSelectedEmpId(e.target.value); setCurrentPage(1); }}
-                  className="w-full appearance-none bg-slate-50 border border-slate-300 text-slate-800 py-2.5 pl-3 pr-9 rounded-lg text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={isStaff}
+                  className={`w-full appearance-none border border-slate-300 py-2.5 pl-3 pr-9 rounded-lg text-xs font-bold focus:outline-none ${isStaff ? 'bg-slate-200 text-slate-500 cursor-not-allowed' : 'bg-slate-50 text-slate-800 focus:ring-2 focus:ring-blue-500'}`}
                 >
                   {deptEmployees.map(e => (
                     <option key={e.id} value={e.id}>{e.name} ({e.id}) - {e.position}</option>
@@ -648,133 +652,6 @@ export default function IndividualSkillMatrix({ userRole = 'admin' }: { userRole
               {independentCount} <span className="text-xs font-normal text-slate-500">ทักษะ</span>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* OJT ASSESSMENT HISTORY LOG TABLE (ประวัติการทดสอบและประเมินผล OJT) */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-slate-200 bg-slate-50/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <BookOpen size={18} className="text-[#0a2540]" />
-            <h3 className="font-bold text-slate-800 text-sm">
-              ประวัติการทดสอบและประเมินผล OJT (OJT Assessment History Log)
-            </h3>
-          </div>
-          <span className="text-xs font-semibold text-slate-500">
-            ประวัติการสอบของ <strong className="text-slate-700">{emp.name} ({emp.id})</strong>
-          </span>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead>
-              <tr className="bg-slate-100/70 border-b border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wide">
-                <th className="px-4 py-3.5">รหัส OJT</th>
-                <th className="px-4 py-3.5">W/I & Skill Type</th>
-                <th className="px-4 py-3.5 text-center">วันที่ทดสอบ</th>
-                <th className="px-3 py-3.5 text-center">คะแนนทฤษฎี</th>
-                <th className="px-3 py-3.5 text-center">คะแนนปฏิบัติ</th>
-                <th className="px-4 py-3.5 text-center">ผลการสอบ & เกรด</th>
-                <th className="px-4 py-3.5 text-center">สถานะการพิจารณา</th>
-                <th className="px-4 py-3.5 text-center">ผู้ประเมิน (Trainer/Chief)</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 bg-white">
-              {emp.id === 'EMP001' ? (
-                <>
-                  <tr className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3.5 font-mono text-xs font-bold text-slate-600">OJT-001</td>
-                    <td className="px-4 py-3.5">
-                      <div className="font-bold text-slate-800 text-xs flex items-center gap-1.5">
-                        <span className="bg-blue-50 border border-blue-200 text-blue-900 px-1.5 py-0.5 rounded font-mono">QCW001-001</span>
-                        <span>การทดสอบวัดความต้านทานและฉนวนไฟฟ้าเบื้องต้น</span>
-                      </div>
-                      <div className="text-xs text-slate-500 font-medium mt-0.5">A - Circuit Connecting / Wire Harnessing</div>
-                    </td>
-                    <td className="px-4 py-3.5 text-center text-xs text-slate-600 font-medium">2026-09-10</td>
-                    <td className="px-3 py-3.5 text-center font-bold text-xs text-emerald-600">85%</td>
-                    <td className="px-3 py-3.5 text-center font-bold text-xs text-emerald-600">88%</td>
-                    <td className="px-4 py-3.5 text-center">
-                      <div className="flex flex-col items-center gap-1">
-                        <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">
-                          <CheckCircle size={12} /> ผ่าน (Passed)
-                        </span>
-                        <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.2 rounded-full">
-                          เกรด: Level 1 (Under Supervision)
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3.5 text-center">
-                      <span className="inline-flex items-center text-[11px] font-bold px-2.5 py-1 rounded-full border bg-amber-50 text-amber-700 border-amber-200">
-                        รออนุมัติจาก Manager
-                      </span>
-                    </td>
-                    <td className="px-4 py-3.5 text-center text-xs font-semibold text-slate-700">นางสาวอรุณี รักดี (Chief)</td>
-                  </tr>
-
-                  <tr className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3.5 font-mono text-xs font-bold text-slate-600">OJT-002</td>
-                    <td className="px-4 py-3.5">
-                      <div className="font-bold text-slate-800 text-xs flex items-center gap-1.5">
-                        <span className="bg-blue-50 border border-blue-200 text-blue-900 px-1.5 py-0.5 rounded font-mono">QCW001-002</span>
-                        <span>การทดสอบพิกัดกำลังไฟฟ้าและแรงดันสูง</span>
-                      </div>
-                      <div className="text-xs text-slate-500 font-medium mt-0.5">B - Machine Operator / Testing Station Control</div>
-                    </td>
-                    <td className="px-4 py-3.5 text-center text-xs text-slate-600 font-medium">2026-09-12</td>
-                    <td className="px-3 py-3.5 text-center font-bold text-xs text-red-500">72%</td>
-                    <td className="px-3 py-3.5 text-center font-bold text-xs text-red-500">65%</td>
-                    <td className="px-4 py-3.5 text-center">
-                      <div className="flex flex-col items-center gap-1">
-                        <span className="inline-flex items-center gap-1 bg-red-50 text-red-600 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-red-200">
-                          ไม่ผ่าน (Failed)
-                        </span>
-                        <span className="text-[10px] font-bold text-slate-400 bg-slate-100 border border-slate-200 px-2 py-0.2 rounded-full">
-                          เกรดคงเดิม: Level 0 (Cannot)
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3.5 text-center">
-                      <span className="inline-flex items-center text-[11px] font-bold px-2.5 py-1 rounded-full border bg-slate-100 text-slate-600 border-slate-200">
-                        บันทึกแล้ว (รอส่ง)
-                      </span>
-                    </td>
-                    <td className="px-4 py-3.5 text-center text-xs font-semibold text-slate-700">นางสาวอรุณี รักดี (Chief)</td>
-                  </tr>
-                </>
-              ) : (
-                <tr className="hover:bg-slate-50 transition-colors">
-                  <td className="px-4 py-3.5 font-mono text-xs font-bold text-slate-600">OJT-010</td>
-                  <td className="px-4 py-3.5">
-                    <div className="font-bold text-slate-800 text-xs flex items-center gap-1.5">
-                      <span className="bg-blue-50 border border-blue-200 text-blue-900 px-1.5 py-0.5 rounded font-mono">QCW001-001</span>
-                      <span>การทดสอบวัดความต้านทานและฉนวนไฟฟ้าเบื้องต้น</span>
-                    </div>
-                    <div className="text-xs text-slate-500 font-medium mt-0.5">C - Inspection Report & Data Recording</div>
-                  </td>
-                  <td className="px-4 py-3.5 text-center text-xs text-slate-600 font-medium">2026-09-01</td>
-                  <td className="px-3 py-3.5 text-center font-bold text-xs text-emerald-600">95%</td>
-                  <td className="px-3 py-3.5 text-center font-bold text-xs text-emerald-600">98%</td>
-                  <td className="px-4 py-3.5 text-center">
-                    <div className="flex flex-col items-center gap-1">
-                      <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">
-                        <CheckCircle size={12} /> ผ่าน (Passed)
-                      </span>
-                      <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.2 rounded-full">
-                        เกรด: Level 3 (Trainer)
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3.5 text-center">
-                    <span className="inline-flex items-center text-[11px] font-bold px-2.5 py-1 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200">
-                      อนุมัติแล้ว
-                    </span>
-                  </td>
-                  <td className="px-4 py-3.5 text-center text-xs font-semibold text-slate-700">นายกฤต พร้อมใจ (Manager)</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
         </div>
       </div>
 

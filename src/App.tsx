@@ -8,6 +8,9 @@ import Approvals from './pages/Approvals';
 import { EmployeeManagement } from './pages/Employees';
 import { MasterData } from './pages/MasterData';
 import { Reports } from './pages/Reports';
+import WorkingRecord from './pages/WorkingRecord';
+import CapacityDashboard from './pages/CapacityDashboard';
+import SkillEvaluation from './pages/SkillEvaluation';
 import { CompareSkillMatrix } from './pages/CompareView';
 import { SettingsPage } from './pages/SettingsPage';
 import { PermissionsPage } from './pages/PermissionsPage';
@@ -139,14 +142,18 @@ function App() {
         {currentPage === 'staff-dashboard' && <StaffDashboard onNavigatePage={(page) => setCurrentPage(page)} />}
         {currentPage === 'wi-library' && <WILibrary userRole={userRole} />}
         {currentPage === 'dashboard' && <Dashboard />}
-        {currentPage === 'overview' && <SectionSkillMatrix />}
+        {currentPage === 'overview' && <SectionSkillMatrix userRole={userRole} />}
         {currentPage === 'individual' && <IndividualSkillMatrix userRole={userRole} />}
-        {currentPage === 'compare' && <CompareSkillMatrix />}
+        {currentPage === 'compare' && <CompareSkillMatrix userRole={userRole} />}
         {currentPage === 'approvals' && <Approvals />}
         {currentPage === 'employees' && <EmployeeManagement />}
         {currentPage === 'master-data' && <MasterData />}
-        {currentPage === 'training' && <Training />}
+        {currentPage === 'training' && <Training userRole={userRole} />}
         {currentPage === 'reports' && <Reports />}
+                    {currentPage === 'working-record' && <WorkingRecord userRole={userRole} />}
+          {currentPage === 'capacity' && <CapacityDashboard />}
+          {currentPage === 'evaluation' && <SkillEvaluation userRole={userRole} />}
+
         {currentPage === 'settings' && (
           <SettingsPage onNavigateToPermissions={() => setCurrentPage('permissions')} />
         )}

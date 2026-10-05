@@ -15,103 +15,134 @@ interface PageFeature {
 const pagePermissionSchema: PageFeature[] = [
   {
     pageId: 'page_dashboard',
-    pageName: '1. หน้าแดชบอร์ด (Dashboard Overview)',
-    description: 'ภาพรวมสถานะทักษะองค์กร, สรุป KPI และการแจ้งเตือน',
+    pageName: '1. แดชบอร์ด (Dashboard)',
+    description: 'ภาพรวมระบบ, สถิติกำลังคน, สถานะ OJT',
     actions: [
-      { key: 'dashboard_view', label: 'เข้าดูข้อมูล (View)', shortCode: 'view' },
-      { key: 'dashboard_export', label: 'ส่งออกรายงานแดชบอร์ด (Export)', shortCode: 'export' },
+      { key: 'dashboard_view', label: 'เข้าดูแดชบอร์ด (View)', shortCode: 'view' },
+      { key: 'dashboard_export', label: 'Export ข้อมูล (Export)', shortCode: 'export' },
     ]
   },
   {
-    pageId: 'page_section_matrix',
-    pageName: '2. ภาพรวม Skill Matrix แผนก (Section Skill Matrix)',
-    description: 'ตารางเมทริกซ์ทักษะพนักงานรายแผนก และ Skill Focused View',
+    pageId: 'page_working_record',
+    pageName: '2. บันทึกการทำงาน (Working Record)',
+    description: 'บันทึกการปฏิบัติงานรายวัน, ชั่วโมงการทำงาน, ของเสีย',
     actions: [
-      { key: 'section_matrix_view', label: 'เข้าดูเมทริกซ์ (View)', shortCode: 'view' },
-      { key: 'section_matrix_edit', label: 'แก้ไขระดับทักษะโดยตรง (Edit)', shortCode: 'edit' },
-      { key: 'section_matrix_export', label: 'ดาวน์โหลดตาราง (Export)', shortCode: 'export' },
+      { key: 'working_view', label: 'ดูประวัติบันทึก (View)', shortCode: 'view' },
+      { key: 'working_create', label: 'เพิ่มบันทึกงาน (Create)', shortCode: 'create' },
+      { key: 'working_edit', label: 'แก้ไขบันทึก (Edit)', shortCode: 'edit' },
     ]
   },
   {
-    pageId: 'page_individual_matrix',
-    pageName: '3. ทักษะรายบุคคล (Individual Skill Matrix)',
-    description: 'โปรไฟล์ทักษะรายบุคคล, Radar Chart และสเปก W/I',
+    pageId: 'page_evaluation',
+    pageName: '3. ระบบประเมินทักษะ (Skill Evaluation)',
+    description: 'ประเมินระดับทักษะอัตโนมัติจากข้อมูลปฏิบัติงาน',
     actions: [
-      { key: 'individual_view', label: 'เข้าดูโปรไฟล์ทักษะ (View)', shortCode: 'view' },
-      { key: 'individual_edit', label: 'แก้ไขคะแนนย่อย (Edit)', shortCode: 'edit' },
-      { key: 'individual_export', label: 'พิมพ์/ส่งออก Profile PDF (Export)', shortCode: 'export' },
-    ]
-  },
-  {
-    pageId: 'page_compare',
-    pageName: '4. เปรียบเทียบทักษะ (Compare Skill Matrix)',
-    description: 'เปรียบเทียบคะแนนทักษะข้ามแผนกและเปรียบเทียบรายปี',
-    actions: [
-      { key: 'compare_view', label: 'เข้าดูการเปรียบเทียบ (View)', shortCode: 'view' },
-      { key: 'compare_export', label: 'ส่งออกกราฟวิเคราะห์ (Export)', shortCode: 'export' },
-    ]
-  },
-  {
-    pageId: 'page_employees',
-    pageName: '5. จัดการพนักงาน (Employee Management)',
-    description: 'จัดการทะเบียนพนักงาน, ข้อมูลส่วนตัว, ตำแหน่ง และสายบังคับบัญชา',
-    actions: [
-      { key: 'emp_create', label: 'เพิ่มพนักงานใหม่ (Create)', shortCode: 'create' },
-      { key: 'emp_view', label: 'ดูรายชื่อและประวัติ (View)', shortCode: 'view' },
-      { key: 'emp_edit', label: 'แก้ไขข้อมูลพนักงาน (Edit)', shortCode: 'edit' },
-      { key: 'emp_delete', label: 'ลบ/จัดเก็บพนักงาน (Delete)', shortCode: 'delete' },
-    ]
-  },
-  {
-    pageId: 'page_master_data',
-    pageName: '6. จัดการข้อมูลพื้นฐาน (Master Data W/I & Skill Types)',
-    description: 'กำหนดมาตรฐานคู่มือ W/I และสเปกประเภททักษะ A, B, C, D, E',
-    actions: [
-      { key: 'master_create', label: 'สร้าง W/I / Skill Type ใหม่ (Create)', shortCode: 'create' },
-      { key: 'master_view', label: 'เข้าดู Master Data (View)', shortCode: 'view' },
-      { key: 'master_edit', label: 'แก้ไขเวอร์ชัน/ข้อความ W/I (Edit)', shortCode: 'edit' },
-      { key: 'master_delete', label: 'ย้ายไปคลังจัดเก็บ Soft-delete (Delete)', shortCode: 'delete' },
-    ]
-  },
-  {
-    pageId: 'page_approvals',
-    pageName: '7. ระบบการอนุมัติ (Approval Workflow & ISO Audit Trail)',
-    description: 'ยื่นคำขอและอนุมัติการปรับระดับทักษะ Level 0->1->2->3',
-    actions: [
-      { key: 'approval_view', label: 'เข้าดูรายการคำขออนุมัติ (View)', shortCode: 'view' },
-      { key: 'approval_submit', label: 'ยื่นคำขออนุมัติปรับเกรด (Submit)', shortCode: 'submit' },
-      { key: 'approval_approve', label: 'อนุมัติ / ปฏิเสธ คำขอ (Approve/Reject)', shortCode: 'approve' },
-      { key: 'approval_delete', label: 'ยกเลิก/ลบคำขออนุมัติ (Delete)', shortCode: 'delete' },
+      { key: 'eval_view', label: 'ดูผลประเมิน (View)', shortCode: 'view' },
+      { key: 'eval_submit', label: 'ส่งคำขออนุมัติทักษะ (Submit)', shortCode: 'submit' },
+      { key: 'eval_manage', label: 'จัดการผลประเมิน (Manage)', shortCode: 'edit' },
     ]
   },
   {
     pageId: 'page_training',
-    pageName: '8. แผนการฝึกอบรม OJT (OJT Training Evaluation)',
-    description: 'บันทึกคะแนนสอบทฤษฎี/ปฏิบัติ และประวัติการฝึกอบรม',
+    pageName: '4. ระบบจัดการการฝึกอบรม (Training)',
+    description: 'บันทึกคะแนนสอบ OJT ทฤษฎี/ปฏิบัติ',
     actions: [
-      { key: 'ojt_create', label: 'บันทึกผลสอบ OJT ใหม่ (Create)', shortCode: 'create' },
-      { key: 'ojt_view', label: 'ดูรายการและประวัติ OJT (View)', shortCode: 'view' },
-      { key: 'ojt_edit', label: 'แก้ไขคะแนนสอบ OJT (Edit)', shortCode: 'edit' },
-      { key: 'ojt_delete', label: 'ลบบันทึกการสอบ (Delete)', shortCode: 'delete' },
+      { key: 'ojt_view', label: 'ดูประวัติ OJT (View)', shortCode: 'view' },
+      { key: 'ojt_create', label: 'สร้างการประเมิน (Create)', shortCode: 'create' },
+      { key: 'ojt_edit', label: 'แก้ไข/ให้คะแนน (Edit)', shortCode: 'edit' },
+      { key: 'ojt_delete', label: 'ลบประวัติ (Delete)', shortCode: 'delete' },
+    ]
+  },
+  {
+    pageId: 'page_approvals',
+    pageName: '5. ระบบการอนุมัติ (Approval)',
+    description: 'อนุมัติคำขอเลื่อนระดับทักษะ และผลสอบ OJT',
+    actions: [
+      { key: 'approval_view', label: 'ดูรายการคำขอ (View)', shortCode: 'view' },
+      { key: 'approval_approve', label: 'อนุมัติ/ปฏิเสธ (Approve)', shortCode: 'approve' },
+    ]
+  },
+  {
+    pageId: 'page_overview_matrix',
+    pageName: '6. ภาพรวม Skill Matrix (Section Matrix)',
+    description: 'ตารางสรุปทักษะภาพรวมแผนก',
+    actions: [
+      { key: 'section_matrix_view', label: 'เข้าดูภาพรวม (View)', shortCode: 'view' },
+      { key: 'section_matrix_export', label: 'Export ข้อมูล (Export)', shortCode: 'export' },
+    ]
+  },
+  {
+    pageId: 'page_individual_matrix',
+    pageName: '7. ทักษะรายบุคคล (Individual Matrix)',
+    description: 'รายละเอียดทักษะรายบุคคล, Radar Chart',
+    actions: [
+      { key: 'individual_view', label: 'เข้าดูทักษะ (View)', shortCode: 'view' },
+      { key: 'individual_export', label: 'Export โปรไฟล์ (Export)', shortCode: 'export' },
+    ]
+  },
+  {
+    pageId: 'page_compare',
+    pageName: '8. เปรียบเทียบ (Compare Matrix)',
+    description: 'เปรียบเทียบคะแนนทักษะรายแผนก แบบข้ามปี',
+    actions: [
+      { key: 'compare_view', label: 'เข้าดูเปรียบเทียบ (View)', shortCode: 'view' },
+      { key: 'compare_export', label: 'Export ข้อมูล (Export)', shortCode: 'export' },
+    ]
+  },
+  {
+    pageId: 'page_capacity',
+    pageName: '9. Workload & Capacity',
+    description: 'ตรวจสอบกำลังการผลิตตามทักษะพนักงาน',
+    actions: [
+      { key: 'capacity_view', label: 'เข้าดูกำลังคน (View)', shortCode: 'view' },
+    ]
+  },
+  {
+    pageId: 'page_wi_library',
+    pageName: '10. คลังคู่มือ W/I (W/I Library)',
+    description: 'เอกสารคู่มือปฏิบัติงานมาตรฐาน',
+    actions: [
+      { key: 'wi_view', label: 'เข้าอ่านคู่มือ (View)', shortCode: 'view' },
+      { key: 'wi_manage', label: 'จัดการคู่มือ (Manage)', shortCode: 'edit' },
+    ]
+  },
+  {
+    pageId: 'page_employees',
+    pageName: '11. จัดการพนักงาน (Employee Management)',
+    description: 'เพิ่ม/แก้ไข ข้อมูลประวัติพนักงาน',
+    actions: [
+      { key: 'emp_view', label: 'ดูประวัติ (View)', shortCode: 'view' },
+      { key: 'emp_create', label: 'เพิ่มพนักงาน (Create)', shortCode: 'create' },
+      { key: 'emp_edit', label: 'แก้ไข (Edit)', shortCode: 'edit' },
+      { key: 'emp_delete', label: 'ลบ (Delete)', shortCode: 'delete' },
+    ]
+  },
+  {
+    pageId: 'page_master_data',
+    pageName: '12. จัดการข้อมูลพื้นฐาน (Master Data)',
+    description: 'กำหนดรหัส W/I, Skill Types',
+    actions: [
+      { key: 'master_view', label: 'ดูข้อมูล (View)', shortCode: 'view' },
+      { key: 'master_manage', label: 'จัดการข้อมูล (Manage)', shortCode: 'edit' },
     ]
   },
   {
     pageId: 'page_reports',
-    pageName: '9. รายงานและการส่งออก (Reports & Export Center)',
-    description: 'ศูนย์กลางสกัดรายงานรูปแบบ Excel (CSV) และ PDF ISO 17025',
+    pageName: '13. รายงาน (Reports)',
+    description: 'ออกรายงานสถิติแบบ Excel และ PDF',
     actions: [
-      { key: 'reports_view', label: 'เข้าดูตัวอย่างรายงาน (View)', shortCode: 'view' },
-      { key: 'reports_export', label: 'ส่งออกรายงาน Excel/PDF (Export)', shortCode: 'export' },
+      { key: 'reports_view', label: 'ดูรายงาน (View)', shortCode: 'view' },
+      { key: 'reports_export', label: 'Export ข้อมูล (Export)', shortCode: 'export' },
     ]
   },
   {
     pageId: 'page_settings',
-    pageName: '10. ตั้งค่าระบบและสิทธิ์การใช้งาน (System Settings & Permissions)',
-    description: 'ตั้งค่าโครงสร้างแผนก, กฎการแจ้งเตือน และจัดการ Role สิทธิ์ผู้ใช้',
+    pageName: '14. ตั้งค่าระบบ (Settings & Permissions)',
+    description: 'กำหนดสิทธิ์, ตั้งค่า UI, นโยบายความปลอดภัย',
     actions: [
-      { key: 'settings_view', label: 'เข้าดูหน้าตั้งค่า (View)', shortCode: 'view' },
-      { key: 'settings_edit', label: 'แก้ไขการตั้งค่าแผนก/ระบบ (Edit)', shortCode: 'edit' },
-      { key: 'permissions_manage', label: 'กำหนด Role & Permissions (Manage)', shortCode: 'approve' },
+      { key: 'settings_view', label: 'เข้าดูตั้งค่า (View)', shortCode: 'view' },
+      { key: 'settings_manage', label: 'จัดการตั้งค่า (Manage)', shortCode: 'edit' },
+      { key: 'permissions_manage', label: 'จัดการสิทธิ์ Role (Permissions)', shortCode: 'approve' },
     ]
   }
 ];
@@ -129,9 +160,9 @@ interface PermissionRole {
 const initialRoles: PermissionRole[] = [
   {
     id: 'role-admin',
-    name: 'ผู้ดูแลระบบสูงสุด (System Administrator)',
+    name: 'ผู้ดูแลระบบ (System Admin)',
     code: 'ADMIN',
-    description: 'สิทธิ์สูงสุด เข้าถึงและจัดการได้ทุกหน้าทุกฟังก์ชัน (Create, View, Edit, Delete, Export, Approve)',
+    description: 'สิทธิ์สูงสุด เข้าถึงและจัดการได้ทุกส่วนของระบบ (Create, View, Edit, Delete, Approve)',
     userCount: 2,
     isSystemRole: true,
     permissions: pagePermissionSchema.reduce((acc, p) => {
@@ -141,62 +172,74 @@ const initialRoles: PermissionRole[] = [
   },
   {
     id: 'role-manager',
-    name: 'ผู้จัดการฝ่าย (Section Manager / Approver)',
+    name: 'ผู้จัดการแผนก (Department Manager)',
     code: 'MANAGER',
-    description: 'อนุมัติคำขอ ISO 17025, ดูรายงานบริหาร, เข้าดูทุกหน้าแต่ไม่สามารถแก้ไข Master Data หรือ Role ได้',
+    description: 'อนุมัติการเลื่อนระดับทักษะ, ดูรายงาน, วิเคราะห์ Capacity, ดูภาพรวมได้ทุกแผนก',
     userCount: 4,
     isSystemRole: true,
     permissions: {
       dashboard_view: true, dashboard_export: true,
-      section_matrix_view: true, section_matrix_edit: false, section_matrix_export: true,
-      individual_view: true, individual_edit: false, individual_export: true,
+      working_view: true, working_create: false, working_edit: false,
+      eval_view: true, eval_submit: false, eval_manage: false,
+      ojt_view: true, ojt_create: false, ojt_edit: false, ojt_delete: false,
+      approval_view: true, approval_approve: true,
+      section_matrix_view: true, section_matrix_export: true,
+      individual_view: true, individual_export: true,
       compare_view: true, compare_export: true,
-      emp_create: false, emp_view: true, emp_edit: false, emp_delete: false,
-      master_create: false, master_view: true, master_edit: false, master_delete: false,
-      approval_view: true, approval_submit: true, approval_approve: true, approval_delete: false,
-      ojt_create: false, ojt_view: true, ojt_edit: false, ojt_delete: false,
+      capacity_view: true,
+      wi_view: true, wi_manage: false,
+      emp_view: true, emp_create: false, emp_edit: false, emp_delete: false,
+      master_view: true, master_manage: false,
       reports_view: true, reports_export: true,
-      settings_view: true, settings_edit: false, permissions_manage: false
+      settings_view: false, settings_manage: false, permissions_manage: false
     }
   },
   {
     id: 'role-chief',
-    name: 'หัวหน้าส่วนงาน / วิทยากร (Chief / Trainer)',
+    name: 'หัวหน้างาน (Section Chief)',
     code: 'CHIEF',
-    description: 'บันทึกคะแนน OJT (Create/Edit), ยื่นเสนอขออนุมัติ (Submit), แก้ไข Skill ในแผนกตนเอง',
+    description: 'จัดการพนักงานในแผนก, ประเมินและให้คะแนน OJT, ดูสรุปการทำงานของทีม',
     userCount: 8,
     isSystemRole: true,
     permissions: {
       dashboard_view: true, dashboard_export: true,
-      section_matrix_view: true, section_matrix_edit: true, section_matrix_export: true,
-      individual_view: true, individual_edit: true, individual_export: true,
+      working_view: true, working_create: true, working_edit: true,
+      eval_view: true, eval_submit: true, eval_manage: true,
+      ojt_view: true, ojt_create: true, ojt_edit: true, ojt_delete: false,
+      approval_view: false, approval_approve: false,
+      section_matrix_view: true, section_matrix_export: true,
+      individual_view: true, individual_export: true,
       compare_view: true, compare_export: true,
-      emp_create: true, emp_view: true, emp_edit: true, emp_delete: false,
-      master_create: false, master_view: true, master_edit: false, master_delete: false,
-      approval_view: true, approval_submit: true, approval_approve: false, approval_delete: false,
-      ojt_create: true, ojt_view: true, ojt_edit: true, ojt_delete: false,
+      capacity_view: true,
+      wi_view: true, wi_manage: true,
+      emp_view: true, emp_create: true, emp_edit: true, emp_delete: false,
+      master_view: true, master_manage: true,
       reports_view: true, reports_export: true,
-      settings_view: false, settings_edit: false, permissions_manage: false
+      settings_view: false, settings_manage: false, permissions_manage: false
     }
   },
   {
     id: 'role-staff',
-    name: 'พนักงานทั่วไป (General Staff / Operator)',
+    name: 'พนักงานทั่วไป (Staff)',
     code: 'STAFF',
-    description: 'สิทธิ์เข้าดู (View Only) เฉพาะตาราง Individual Skill Matrix ของตนเอง และแดชบอร์ดภาพรวม',
+    description: 'สิทธิ์ดูเฉพาะข้อมูลส่วนตัว (My Profile), บันทึกการทำงานของตนเอง, ดูคู่มือ W/I',
     userCount: 65,
     isSystemRole: true,
     permissions: {
       dashboard_view: true, dashboard_export: false,
-      section_matrix_view: true, section_matrix_edit: false, section_matrix_export: false,
-      individual_view: true, individual_edit: false, individual_export: false,
-      compare_view: true, compare_export: false,
-      emp_create: false, emp_view: false, emp_edit: false, emp_delete: false,
-      master_create: false, master_view: false, master_edit: false, master_delete: false,
-      approval_view: false, approval_submit: false, approval_approve: false, approval_delete: false,
-      ojt_create: false, ojt_view: true, ojt_edit: false, ojt_delete: false,
+      working_view: true, working_create: true, working_edit: false,
+      eval_view: true, eval_submit: true, eval_manage: false,
+      ojt_view: true, ojt_create: false, ojt_edit: false, ojt_delete: false,
+      approval_view: false, approval_approve: false,
+      section_matrix_view: false, section_matrix_export: false,
+      individual_view: true, individual_export: false,
+      compare_view: false, compare_export: false,
+      capacity_view: false,
+      wi_view: true, wi_manage: false,
+      emp_view: false, emp_create: false, emp_edit: false, emp_delete: false,
+      master_view: false, master_manage: false,
       reports_view: false, reports_export: false,
-      settings_view: false, settings_edit: false, permissions_manage: false
+      settings_view: false, settings_manage: false, permissions_manage: false
     }
   }
 ];
