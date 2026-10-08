@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
+import { CURRENT_USER_PROFILES, APPROVAL_STATS } from '../lib/sharedMockData';
 import { User, Award, BookOpen, CheckCircle, Target, TrendingUp, Calendar, Send, FileText, ChevronRight, Check } from 'lucide-react';
 
 interface StaffDashboardProps {
   onNavigatePage?: (page: string) => void;
 }
 
-export function StaffDashboard({ onNavigatePage }: StaffDashboardProps) {
+export function StaffDashboard({ onNavigatePage, userRole = 'staff' }: StaffDashboardProps & { userRole?: string }) {
+  const profile = CURRENT_USER_PROFILES[userRole] || CURRENT_USER_PROFILES.staff;
   const [requestSent, setRequestSent] = useState(false);
   const [selectedWiForRequest, setSelectedWiForRequest] = useState('QCW001-002');
   const [showRequestModal, setShowRequestModal] = useState(false);
@@ -39,11 +41,11 @@ export function StaffDashboard({ onNavigatePage }: StaffDashboardProps) {
                 <span className="text-xs font-semibold bg-teal-500/30 text-teal-200 border border-teal-400/30 px-2.5 py-0.5 rounded-full">
                   พนักงานระดับปฏิบัติการ (Staff View)
                 </span>
-                <span className="text-xs text-blue-200">EMP001</span>
+                <span className="text-xs text-blue-200">{profile.id}</span>
               </div>
-              <h1 className="text-2xl font-bold">ยินดีต้อนรับกลับ, คุณสมชาย ใจดี 👋</h1>
+              <h1 className="text-2xl font-bold">ยินดีต้อนรับกลับ, คุณ{profile.name} 👋</h1>
               <p className="text-blue-200 text-xs mt-1">
-                ตำแหน่ง: Quality Inspector · แผนก QC Section · หัวหน้าสายตรง: <strong className="text-white">นางสาวอรุณี รักดี (Chief)</strong>
+                ตำแหน่ง: {profile.position} · แผนก {profile.department} · หัวหน้าสายตรง: <strong className="text-white">{profile.chief}</strong>
               </p>
             </div>
           </div>
@@ -51,7 +53,7 @@ export function StaffDashboard({ onNavigatePage }: StaffDashboardProps) {
           <div className="flex items-center gap-3 bg-white/10 backdrop-blur border border-white/15 p-3.5 rounded-xl">
             <div className="text-right">
               <div className="text-xs text-blue-200 font-medium">ระดับความพร้อมทำงาน (Competency)</div>
-              <div className="text-2xl font-bold text-teal-300">78% <span className="text-xs font-normal text-white">(Independent)</span></div>
+              <div className="text-2xl font-bold text-teal-300">{profile.competencyPercent}% <span className="text-xs font-normal text-white">({profile.competencyPercent >= 75 ? 'Independent' : profile.competencyPercent >= 50 ? 'Under Supervision' : 'Learning'})</span></div>
             </div>
             <div className="w-10 h-10 rounded-full bg-teal-500/20 flex items-center justify-center text-teal-300">
               <TrendingUp size={22} />
@@ -67,7 +69,7 @@ export function StaffDashboard({ onNavigatePage }: StaffDashboardProps) {
             <FileText size={22} />
           </div>
           <div>
-            <div className="text-2xl font-bold text-slate-800">5 WIs</div>
+            <div className="text-2xl font-bold text-slate-800">{profile.skillsAssigned} WIs</div>
             <div className="text-xs text-slate-500">W/I ที่รับผิดชอบในสายงาน</div>
           </div>
         </div>

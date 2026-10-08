@@ -1,4 +1,5 @@
 ﻿import React from 'react';
+import { WORKING_STATS, APPROVAL_STATS, DEFAULT_CAPACITY_DATA, CURRENT_USER_PROFILES } from '../lib/sharedMockData';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { Users, Activity, AlertTriangle, TrendingUp, BookOpen, Award, CheckCircle, Clock } from 'lucide-react';
 
@@ -9,10 +10,24 @@ const mockTrend = [
   { year: '2026', level1: 10, level2: 30, level3: 20 },
 ];
 
-export default function Dashboard() {
+export default function Dashboard({ userRole = 'admin' }: { userRole?: string }) {
+  const isChief = userRole === 'chief';
+  const isAdmin = userRole === 'admin';
+  const isManager = userRole === 'manager';
+
+  // For Chief: only show their department capacity
+  const deptCapacity = DEFAULT_CAPACITY_DATA.find(d => d.section === 'QC Section');
+  const totalCapacity = isChief && deptCapacity ? deptCapacity.capacity : WORKING_STATS.totalCapacityHours;
+  const totalActual   = isChief && deptCapacity ? deptCapacity.actualLoad : WORKING_STATS.totalActualHours;
+  const overallLoad   = ((totalActual / totalCapacity) * 100).toFixed(1);
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6 pb-24 bg-slate-50 min-h-screen">
       {/* Header */}
+      {isChief && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-center gap-3 text-blue-800 text-sm font-semibold">
+          <span>🏢</span> มุมมองหัวหน้างาน: แสดงข้อมูลเฉพาะแผนก <strong>QC Section</strong>
+        </div>
+      )}
       <div>
         <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
           <Activity className="text-indigo-600" /> แดชบอร์ดผู้บริหาร (Executive Dashboard)
@@ -24,25 +39,25 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center gap-2 text-indigo-600 mb-2"><Users size={16} /><span className="font-bold text-xs uppercase">กำลังการผลิตรวม (Capacity)</span></div>
-          <h2 className="text-2xl font-black text-slate-800">560 <span className="text-sm font-medium text-slate-500">Hrs/Day</span></h2>
+          <h2 className="text-2xl font-black text-slate-800">{isChief ? (deptCapacity?.capacity ?? 0) : WORKING_STATS.totalCapacityHours} <span className="text-sm font-medium text-slate-500">Hrs/Day</span></h2>
           <p className="text-xs text-slate-400 mt-1">ชั่วโมงการทำงานสูงสุดของทุกแผนก</p>
         </div>
         
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center gap-2 text-emerald-600 mb-2"><Activity size={16} /><span className="font-bold text-xs uppercase">เปรียบเทียบภาระงาน (Plan vs Actual)</span></div>
-          <h2 className="text-2xl font-black text-slate-800">94.6%</h2>
+          <h2 className="text-2xl font-black text-slate-800">{overallLoad}%</h2>
           <p className="text-xs text-slate-400 mt-1">อัตราภาระงานจริงของทั้งโรงงาน</p>
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center gap-2 text-rose-600 mb-2"><AlertTriangle size={16} /><span className="font-bold text-xs uppercase">อัตรางานเสีย/งานแก้ (NC/Rework)</span></div>
-          <h2 className="text-2xl font-black text-slate-800">1.2%</h2>
+          <h2 className="text-2xl font-black text-slate-800">{WORKING_STATS.avgNcReworkPercent}%</h2>
           <p className="text-xs text-slate-400 mt-1">อัตรางานแก้ (อยู่ในเกณฑ์น้อยกว่า 5%)</p>
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center gap-2 text-amber-500 mb-2"><TrendingUp size={16} /><span className="font-bold text-xs uppercase">การประเมินทักษะ</span></div>
-          <h2 className="text-2xl font-black text-slate-800">3 <span className="text-sm font-medium text-slate-500">รอดำเนินการ</span></h2>
+          <h2 className="text-2xl font-black text-slate-800">{APPROVAL_STATS.autoUpgradePending} <span className="text-sm font-medium text-slate-500">รอดำเนินการ</span></h2>
           <p className="text-xs text-slate-400 mt-1">รายการเลื่อนระดับอัตโนมัติจากระบบ</p>
         </div>
       </div>
@@ -73,11 +88,11 @@ export default function Dashboard() {
           <div className="space-y-4">
             <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
               <div><p className="text-xs font-bold text-slate-700">คำขอรับการฝึกอบรม OJT (Level 0 &rarr; 1)</p><p className="text-[10px] text-slate-500">รอหัวหน้างาน (Chief) ตรวจสอบ</p></div>
-              <span className="font-black text-indigo-600 text-lg">7</span>
+              <span className="font-black text-indigo-600 text-lg">{APPROVAL_STATS.pendingOJT}</span>
             </div>
             <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
               <div><p className="text-xs font-bold text-slate-700">รอการอนุมัติจากผู้จัดการ</p><p className="text-[10px] text-slate-500">รอดำเนินการ Final Approve</p></div>
-              <span className="font-black text-amber-500 text-lg">4</span>
+              <span className="font-black text-amber-500 text-lg">{APPROVAL_STATS.pendingAnnual}</span>
             </div>
             <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
               <div><p className="text-xs font-bold text-slate-700">พนักงานที่ได้รับการเลื่อนระดับ (เดือนนี้)</p><p className="text-[10px] text-slate-500">พัฒนาทักษะสำเร็จแล้ว</p></div>

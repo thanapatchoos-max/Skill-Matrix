@@ -56,7 +56,7 @@ const mockWIs: WorkInstruction[] = [
 
 const ITEMS_PER_PAGE = 10;
 
-export function MasterData() {
+export function MasterData({ userRole = 'admin' }: { userRole?: string }) {
   const [wis, setWis] = useState<WorkInstruction[]>(mockWIs);
   const [skillTypes, setSkillTypes] = useState<SkillType[]>(initialTypes);
   

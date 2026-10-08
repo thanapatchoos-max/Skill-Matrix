@@ -14,7 +14,11 @@ const masterWIs = MASTER_WIS.map(w => ({
 
 const mockEmployees = [...MOCK_EMPLOYEES];
 
-export function EmployeeManagement() {
+export function EmployeeManagement({ userRole = 'admin' }: { userRole?: string }) {
+  const isAdmin = userRole === 'admin';
+  const isChief = userRole === 'chief';
+  const isManager = userRole === 'manager';
+  const CHIEF_DEPT = 'QC Section'; // Chief is locked to this department
   const [employees, setEmployees] = useState<Employee[]>(mockEmployees);
   const [viewDisplayMode, setViewDisplayMode] = useState<'list' | 'org'>('list');
   

@@ -34,6 +34,11 @@ export default function SkillEvaluation({ userRole }: { userRole: string }) {
 
   const [evaluations, setEvaluations] = useState<AutoEvaluation[]>(mockEvaluations);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   // Staff Data
   const myData = evaluations.filter(e => e.employee === 'คุณ (ผู้ใช้งานปัจจุบัน)');
@@ -48,6 +53,7 @@ export default function SkillEvaluation({ userRole }: { userRole: string }) {
 
   const handleChiefApprove = (id: string) => {
     setEvaluations(evals => evals.map(e => e.id === id ? { ...e, status: 'pending_manager' } : e));
+    showToast('ตรวจสอบผลสำเร็จ! ส่งคำขอเลื่อนระดับอัตโนมัติไปยัง Manager เรียบร้อยแล้ว');
   };
 
   const ProgressBar = ({ current, target, isInverse = false, suffix = '' }: { current: number, target: number, isInverse?: boolean, suffix?: string }) => {
@@ -79,6 +85,12 @@ export default function SkillEvaluation({ userRole }: { userRole: string }) {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6 pb-24">
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-xl flex items-center gap-3 border border-slate-700 animate-bounce">
+          <CheckCircle size={18} className="text-emerald-400" />
+          <span className="text-sm font-medium">{toastMessage}</span>
+        </div>
+      )}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
           <TrendingUp className="text-emerald-600" /> ระบบประเมินและขอเลื่อนระดับทักษะ (Level 1 &rarr; 3)

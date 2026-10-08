@@ -22,16 +22,21 @@ const masterWIs = [
   { code: 'ENG-M-002', name: 'การสอบเทียบเครื่องมือวัดไฟฟ้ามาตรฐาน ISO/IEC 17025', department: 'Engineering' }
 ];
 
-export function Reports() {
+export function Reports({ userRole = 'admin' }: { userRole?: string }) {
+  const isChief = userRole === 'chief';
+  const isManager = userRole === 'manager' || userRole === 'admin';
+  const CHIEF_DEPT = 'QC Section'; // In production: from user session
+  // Chief: pre-lock their department in all filters
+  const initialDept = isChief ? 'QC Section' : 'ALL';
   const [filters, setFilters] = useState<ReportFilterState>({
-    matrixDept: 'ALL',
+    matrixDept: initialDept,
     matrixYear: '2026',
     auditStartDate: '2026-01-01',
     auditEndDate: '2026-10-01',
     auditType: 'ALL',
     ojtWi: 'ALL',
     ojtResult: 'ALL',
-    gapDept: 'ALL',
+    gapDept: initialDept,
   });
 
   const [activePreview, setActivePreview] = useState<'matrix' | 'audit' | 'ojt' | 'gap' | null>('matrix');

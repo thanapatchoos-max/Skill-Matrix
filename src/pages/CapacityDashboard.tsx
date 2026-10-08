@@ -1,8 +1,8 @@
-﻿import React from 'react';
+﻿import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, ComposedChart } from 'recharts';
-import { Activity, Users, Clock, AlertTriangle, TrendingUp, Briefcase } from 'lucide-react';
+import { Activity, Users, Clock, AlertTriangle, TrendingUp, Briefcase, Settings, X, Save, Edit3 } from 'lucide-react';
 
-const capacityData = [
+const initialCapacityData = [
   { section: 'Production', staff: 25, capacity: 200, planLoad: 180, actualLoad: 195, planPercent: 90, actualPercent: 97.5 },
   { section: 'QC Section', staff: 15, capacity: 120, planLoad: 130, actualLoad: 110, planPercent: 108, actualPercent: 91.6 },
   { section: 'Engineering', staff: 10, capacity: 80, planLoad: 70, actualLoad: 75, planPercent: 87.5, actualPercent: 93.7 },
@@ -10,7 +10,26 @@ const capacityData = [
   { section: 'Warehouse', staff: 12, capacity: 96, planLoad: 100, actualLoad: 90, planPercent: 104, actualPercent: 93.7 },
 ];
 
-export default function CapacityDashboard() {
+export default function CapacityDashboard({ userRole = 'admin' }: { userRole?: string }) {
+  const isAdmin = userRole === 'admin';
+  const [capacityData, setCapacityData] = useState(initialCapacityData);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editData, setEditData] = useState([...capacityData]);
+
+  const handleSave = () => {
+    // Recalculate percentages and capacities based on standard 8 hours per staff
+    const updated = editData.map(d => {
+      const newCapacity = d.staff * 8; // Assuming 8 standard hours
+      return {
+        ...d,
+        capacity: newCapacity,
+        planPercent: Number(((d.planLoad / newCapacity) * 100).toFixed(1)) || 0,
+        actualPercent: Number(((d.actualLoad / newCapacity) * 100).toFixed(1)) || 0
+      };
+    });
+    setCapacityData(updated);
+    setIsModalOpen(false);
+  };
   const totalCapacity = capacityData.reduce((sum, d) => sum + d.capacity, 0);
   const totalActual = capacityData.reduce((sum, d) => sum + d.actualLoad, 0);
   const overallLoad = ((totalActual / totalCapacity) * 100).toFixed(1);
@@ -18,11 +37,24 @@ export default function CapacityDashboard() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6 pb-24">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-          <Activity className="text-indigo-600" /> การจัดการภาระงานและกำลังคน (Workload & Capacity)
-        </h1>
-        <p className="text-slate-500 text-sm mt-1">วิเคราะห์กำลังคน (Capacity) เปรียบเทียบกับภาระงานที่วางแผนไว้ (Plan Load) และที่เกิดขึ้นจริง (Actual Load) ของแต่ละแผนก</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+            <Activity className="text-indigo-600" /> การจัดการภาระงานและกำลังคน (Workload & Capacity)
+          </h1>
+          <p className="text-slate-500 text-sm mt-1">วิเคราะห์กำลังคน (Capacity) เปรียบเทียบกับภาระงานที่วางแผนไว้ (Plan Load) และที่เกิดขึ้นจริง (Actual Load) ของแต่ละแผนก</p>
+        </div>
+        {isAdmin && (
+          <button 
+            onClick={() => {
+              setEditData([...capacityData]);
+              setIsModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors font-semibold shadow-md text-sm whitespace-nowrap"
+          >
+            <Settings size={18} /> จัดการแผนกำลังคน (Admin)
+          </button>
+        )}
       </div>
 
       {/* Summary Metrics */}
@@ -141,6 +173,104 @@ export default function CapacityDashboard() {
           </table>
         </div>
       </div>
+      {/* Edit Data Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="p-5 border-b border-slate-200 flex items-center justify-between sticky top-0 bg-white z-10">
+              <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Edit3 className="text-indigo-600" /> กรอกข้อมูลแผนกำลังคนและภาระงานประจำวัน
+              </h2>
+              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-6 text-sm text-indigo-800 flex items-start gap-3">
+                <Activity className="mt-0.5 flex-shrink-0" size={18} />
+                <p>
+                  <strong>จำลองการเชื่อมต่อข้อมูล:</strong> ในระบบจริง (Production) ข้อมูลจำนวนพนักงานจะถูกดึงผ่าน API จากระบบ HR (เวลาเข้างาน) 
+                  และงานตามแผนจะดึงจาก ERP (แผนผลิตประจำวัน) ส่วนงานทำจริงดึงจากโมดูล Working Record. 
+                  สำหรับฟอร์มนี้ แอดมินสามารถกรอกตัวเลขเพื่อจำลองสถานการณ์ต่างๆ และดูผลลัพธ์บน Dashboard ทันที
+                </p>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead>
+                    <tr className="bg-slate-100/70 border-b border-slate-200 text-xs text-slate-700 font-bold uppercase tracking-wide">
+                      <th className="px-4 py-3">แผนก (Section)</th>
+                      <th className="px-4 py-3">จำนวนพนักงาน (คน)</th>
+                      <th className="px-4 py-3">งานตามแผน (ชม.)</th>
+                      <th className="px-4 py-3">งานทำจริง (ชม.)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {editData.map((row, index) => (
+                      <tr key={row.section} className="hover:bg-slate-50">
+                        <td className="px-4 py-3 font-bold text-slate-800">{row.section}</td>
+                        <td className="px-4 py-3">
+                          <input 
+                            type="number" 
+                            value={row.staff} 
+                            onChange={(e) => {
+                              const newData = [...editData];
+                              newData[index].staff = Number(e.target.value) || 0;
+                              setEditData(newData);
+                            }}
+                            className="w-24 border border-slate-300 rounded-lg p-2 text-center"
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <input 
+                            type="number" 
+                            value={row.planLoad} 
+                            onChange={(e) => {
+                              const newData = [...editData];
+                              newData[index].planLoad = Number(e.target.value) || 0;
+                              setEditData(newData);
+                            }}
+                            className="w-24 border border-slate-300 rounded-lg p-2 text-center"
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <input 
+                            type="number" 
+                            value={row.actualLoad} 
+                            onChange={(e) => {
+                              const newData = [...editData];
+                              newData[index].actualLoad = Number(e.target.value) || 0;
+                              setEditData(newData);
+                            }}
+                            className="w-24 border border-slate-300 rounded-lg p-2 text-center"
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-xs text-slate-400 mt-3">* กำลังคนสูงสุด (Max Capacity) จะถูกคำนวณอัตโนมัติโดยใช้เกณฑ์ทำงาน 8 ชม./คน</p>
+            </div>
+
+            <div className="p-5 border-t border-slate-200 bg-slate-50 flex justify-end gap-3 rounded-b-2xl sticky bottom-0">
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="px-5 py-2.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-lg font-bold text-sm transition-colors"
+              >
+                ยกเลิก
+              </button>
+              <button 
+                onClick={handleSave}
+                className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-sm transition-colors shadow-md"
+              >
+                <Save size={18} /> บันทึกและจำลองผล
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

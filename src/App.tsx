@@ -139,19 +139,19 @@ function App() {
         </div>
 
         {/* Page Content */}
-        {currentPage === 'staff-dashboard' && <StaffDashboard onNavigatePage={(page) => setCurrentPage(page)} />}
+        {currentPage === 'staff-dashboard' && <StaffDashboard userRole={userRole} onNavigatePage={(page) => setCurrentPage(page)} />}
         {currentPage === 'wi-library' && <WILibrary userRole={userRole} />}
-        {currentPage === 'dashboard' && <Dashboard />}
+        {currentPage === 'dashboard' && <Dashboard userRole={userRole} />}
         {currentPage === 'overview' && <SectionSkillMatrix userRole={userRole} />}
         {currentPage === 'individual' && <IndividualSkillMatrix userRole={userRole} />}
         {currentPage === 'compare' && <CompareSkillMatrix userRole={userRole} />}
-        {currentPage === 'approvals' && <Approvals />}
-        {currentPage === 'employees' && <EmployeeManagement />}
-        {currentPage === 'master-data' && <MasterData />}
+        {currentPage === 'approvals' && <Approvals userRole={userRole} />}
+        {currentPage === 'employees' && <EmployeeManagement userRole={userRole} />}
+        {currentPage === 'master-data' && <MasterData userRole={userRole} />}
         {currentPage === 'training' && <Training userRole={userRole} />}
-        {currentPage === 'reports' && <Reports />}
+        {currentPage === 'reports' && <Reports userRole={userRole} />}
                     {currentPage === 'working-record' && <WorkingRecord userRole={userRole} />}
-          {currentPage === 'capacity' && <CapacityDashboard />}
+          {currentPage === 'capacity' && <CapacityDashboard userRole={userRole} />}
           {currentPage === 'evaluation' && <SkillEvaluation userRole={userRole} />}
 
         {currentPage === 'settings' && (
