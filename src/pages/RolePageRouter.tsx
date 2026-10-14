@@ -10,7 +10,7 @@ import { ChiefHomePage, ChiefTeamSkillsPage, ChiefYearlyPage, ChiefJobSummaryPag
 import ChiefIndividualScoresPage from './chief/IndividualScoresPage';
 import ChiefTrainingRequestsPage from './chief/TrainingRequestsPage';
 import ChiefTrainingEvaluationPage from './chief/TrainingEvaluationPage';
-import { ManagerHomePage, ManagerSkillApprovalsPage, ManagerIndividualScoresPage, ManagerSectionSkillsPage, ManagerYearlyPage, ManagerJobSummaryPage, ManagerDirectoryPage, ManagerReferencePage } from './manager/ManagerPages';
+import { ManagerHomePage, ManagerSkillApprovalsPage, ManagerIndividualScoresPage, ManagerSectionSkillsPage, ManagerYearlyPage, ManagerJobSummaryPage, ManagerDirectoryPage } from './manager/ManagerPages';
 import IndividualAssessmentPage from './manager/IndividualAssessmentPage';
 import SectionAssessmentPage from './manager/SectionAssessmentPage';
 import ManagerTrainingApprovalsPage from './manager/TrainingApprovalsPage';
@@ -33,7 +33,7 @@ export default function RolePageRouter({page,role,onNavigate,assessmentScope}:{p
     'manager-individual-scores':<ManagerIndividualScoresPage/>,
     'manager-assessment-individual':<IndividualAssessmentPage initialScope={assessmentScope}/>, 'manager-assessment-section':<SectionAssessmentPage initialScope={assessmentScope}/>,
     'manager-yearly':<ManagerYearlyPage/>, 'manager-job-summary':<ManagerJobSummaryPage/>,
-    'manager-people-directory':<ManagerDirectoryPage/>, 'manager-wi-reference':<ManagerReferencePage/>,
+    'manager-people-directory':<ManagerDirectoryPage/>,
     'admin-home':<AdminHomePage onNavigate={onNavigate}/>, 'admin-employees':<AdminEmployeesPage/>,
     'admin-master-data':<AdminMasterDataPage/>, 'admin-wi-management':<AdminDocumentsPage/>,
     'admin-skill-audit':<AdminSkillAuditPage/>, 'admin-training-audit':<AdminTrainingAuditPage/>,

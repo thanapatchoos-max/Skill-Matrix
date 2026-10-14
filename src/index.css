@@ -80,20 +80,23 @@
 }
 
 @media print {
-  @page { size: A4 landscape; margin: 12mm; }
-  body { background: white; }
-  table { font-size: 10px; }
-  th, td { padding: 5px !important; }
+  @page { size: A4 landscape; margin: 8mm; }
+  body { background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  table { font-size: 9.5px; width: 100%; border-collapse: collapse; }
+  th, td { padding: 5px 7px !important; }
   thead { display: table-header-group; }
-  tr { break-inside: avoid; }
-  .overflow-x-auto { overflow: visible; }
+  tfoot { display: table-footer-group; }
+  tr { break-inside: avoid; page-break-inside: avoid; }
+  .overflow-x-auto { overflow: visible !important; }
   button { color: inherit; }
-  h2, h3 { break-after: avoid; }
+  h1, h2, h3 { break-after: avoid; page-break-after: avoid; }
   .report-details-title { break-after: avoid; }
   .report-job-card { break-inside: avoid; overflow: visible; }
-  .assessment-chart, .assessment-summary { break-inside: avoid; }
-  .assessment-report { font-size: 11px; }
-  .assessment-report > * + * { margin-top: 12px !important; }
-  .assessment-report .p-5 { padding: 12px; }
-  .assessment-report .text-3xl { font-size: 24px; }
+  .assessment-chart, .assessment-summary, .assessment-details { break-inside: avoid; page-break-inside: avoid; }
+  .assessment-department { break-inside: avoid; page-break-inside: avoid; margin-bottom: 10px; }
+  .break-inside-avoid { break-inside: avoid; page-break-inside: avoid; }
+  .assessment-report { font-size: 10.5px; }
+  .assessment-report > * + * { margin-top: 10px !important; }
+  .assessment-report .p-5, .assessment-report .p-6 { padding: 10px; }
+  .assessment-report .text-3xl { font-size: 20px; }
 }

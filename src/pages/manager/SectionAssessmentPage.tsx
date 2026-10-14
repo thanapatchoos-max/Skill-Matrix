@@ -44,7 +44,7 @@ export default function SectionAssessmentPage({initialScope}:{initialScope?:Scor
         <div className="flex flex-wrap justify-between gap-3 border-t border-blue-100 bg-blue-50/40 px-5 py-4 text-xs text-blue-900"><p><strong>คะแนนเฉลี่ยต่อคน:</strong> {group.total} ÷ {group.people} = <strong>{group.averagePerPerson.toFixed(2)} คะแนน/คน</strong></p><p>เฉลี่ยต่อสกิลในแถวรวม = คะแนนรวม ÷ จำนวนสกิลของพนักงานทั้งหมด</p></div>
       </section>)}
       <AssessmentFormula section/>
-      <p className="text-xs leading-6 text-slate-500">รายงาน PDF จัดแผนกและรายชื่อพนักงานเป็นส่วนชัดเจน พร้อมยอดรวม คะแนนเฉลี่ย และเลขหน้าครบทุกหน้า</p>
+      <p className="text-xs leading-6 text-slate-500 print:hidden">รายงาน PDF จัดแผนกและรายชื่อพนักงานเป็นส่วนชัดเจน พร้อมยอดรวม คะแนนเฉลี่ย และเลขหน้าครบทุกหน้า</p>
     </>}
   </div>;
 }

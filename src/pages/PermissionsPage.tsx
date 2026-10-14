@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { ShieldCheck, Plus, Check, Shield, Lock, Users, Key, Save, Info, ChevronRight, Eye, Edit3, Trash2, CheckCircle2, FileSpreadsheet, Send, FileCheck } from 'lucide-react';
 
 interface PageFeature {
@@ -187,7 +187,7 @@ const initialRoles: PermissionRole[] = [
       individual_view: true, individual_export: true,
       compare_view: true, compare_export: true,
       capacity_view: true,
-      wi_view: true, wi_manage: false,
+      wi_view: false, wi_manage: false,
       emp_view: true, emp_create: false, emp_edit: false, emp_delete: false,
       master_view: true, master_manage: false,
       reports_view: true, reports_export: true,
