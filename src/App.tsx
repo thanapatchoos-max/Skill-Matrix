@@ -1,168 +1,36 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { Bell, LogOut } from 'lucide-react';
 import Sidebar from './components/Sidebar';
-import Dashboard from './pages/Dashboard';
-import IndividualSkillMatrix from './pages/IndividualSkillMatrix';
-import SectionSkillMatrix from './pages/SectionSkillMatrix';
-import Training from './pages/Training';
-import Approvals from './pages/Approvals';
-import { EmployeeManagement } from './pages/Employees';
-import { MasterData } from './pages/MasterData';
-import { Reports } from './pages/Reports';
-import WorkingRecord from './pages/WorkingRecord';
-import CapacityDashboard from './pages/CapacityDashboard';
-import SkillEvaluation from './pages/SkillEvaluation';
-import { CompareSkillMatrix } from './pages/CompareView';
-import { SettingsPage } from './pages/SettingsPage';
-import { PermissionsPage } from './pages/PermissionsPage';
 import { LoginPage } from './pages/LoginPage';
-import { StaffDashboard } from './pages/StaffDashboard';
-import { WILibrary } from './pages/WILibrary';
-import { Bell, LogOut, Settings as SettingsIcon } from 'lucide-react';
+import RolePageRouter from './pages/RolePageRouter';
+import { ACTORS } from './data/phase1Core';
+import type { Role } from './data/phase1Core';
+import type { ScoreAssessmentScope } from './data/skillAssessment';
+import { ROLE_NAMES, roleCanVisit, roleHome, rolePage } from './data/roleNavigation';
+import { getStorageError, useSkillState } from './data/phase1Store';
+import { trainingStorageError, useTrainingRequests } from './data/trainingStore';
 
-function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState('');
-  const [currentPage, setCurrentPage] = useState('dashboard');
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
-
-  const handleLoginSuccess = (role: string) => {
-    setUserRole(role);
-    setIsLoggedIn(true);
-    if (role === 'staff') {
-      setCurrentPage('staff-dashboard');
-    } else if (role === 'manager') {
-      setCurrentPage('approvals');
-    } else {
-      setCurrentPage('dashboard');
-    }
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUserRole('');
-  };
-
-  if (!isLoggedIn) {
-    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
-  }
-
-  return (
-    <div className="min-h-screen bg-[#f8f9fc] flex print:bg-white print:block">
-      <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} userRole={userRole} />
-      
-      <main className="flex-1 ml-64 p-8 print:ml-0 print:p-0 print:block">
-        {/* Top Header / Header right area */}
-        <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-200 print:hidden">
-          <div className="flex items-center gap-2 text-slate-500 font-medium">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-            Skill Matrix & Workforce Competency Management System
-          </div>
-          <div className="flex items-center gap-4">
-            
-            {/* Notification Bell */}
-            <div className="relative">
-              <button 
-                onClick={() => setShowNotifications(!showNotifications)}
-                className="relative p-2 rounded-full hover:bg-slate-100 transition-colors"
-              >
-                <Bell className="w-5 h-5 text-slate-500" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-              </button>
-              
-              {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-50">
-                  <div className="p-3 border-b border-slate-100 font-semibold text-sm text-slate-700 flex justify-between items-center">
-                    การแจ้งเตือน
-                    <span className="text-xs text-blue-600 cursor-pointer hover:underline">อ่านทั้งหมด</span>
-                  </div>
-                  <div className="max-h-80 overflow-y-auto">
-                    <div className="p-3 border-b border-slate-50 hover:bg-slate-50 cursor-pointer">
-                      <div className="text-sm font-semibold text-slate-700">มีรายการประเมินใหม่ที่ต้องอนุมัติ</div>
-                      <div className="text-xs text-slate-500 mt-1">สมชาย ขอรับการประเมินทักษะ React (Level 2)</div>
-                      <div className="text-xs text-slate-400 mt-1">10 นาทีที่แล้ว</div>
-                    </div>
-                    <div className="p-3 border-b border-slate-50 hover:bg-slate-50 cursor-pointer">
-                      <div className="text-sm font-semibold text-slate-700">มีพนักงานเข้าใหม่ในแผนก</div>
-                      <div className="text-xs text-slate-500 mt-1">กรุณากำหนดเป้าหมายทักษะให้พนักงานใหม่</div>
-                      <div className="text-xs text-slate-400 mt-1">2 ชั่วโมงที่แล้ว</div>
-                    </div>
-                  </div>
-                  <div className="p-2 text-center border-t border-slate-100">
-                    <button className="text-xs text-blue-600 font-medium hover:underline">ดูการแจ้งเตือนทั้งหมด</button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center gap-3 pl-4 border-l border-slate-200 relative">
-              <div className="text-right">
-                <div className="font-bold text-slate-700 text-sm">สมชาย วงศ์ไทย</div>
-                <div className="text-xs text-slate-500">
-                  {userRole === 'admin' ? 'System Admin' : 
-                   userRole === 'manager' ? 'Department Manager' : 
-                   userRole === 'chief' ? 'Section Chief' : 'Staff'}
-                </div>
-              </div>
-              <button 
-                onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="w-10 h-10 bg-slate-200 rounded-full overflow-hidden flex items-center justify-center hover:ring-2 hover:ring-blue-500 transition-all focus:outline-none"
-              >
-                <svg className="w-6 h-6 text-slate-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                </svg>
-              </button>
-
-              {/* Profile Dropdown Menu */}
-              {showProfileMenu && (
-                <div className="absolute right-0 top-12 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden z-50">
-                  <div className="py-1">
-                    <button onClick={() => { setCurrentPage('settings'); setShowProfileMenu(false); }} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2">
-                      <SettingsIcon size={16} className="text-slate-400" />
-                      ตั้งค่าบัญชีผู้ใช้
-                    </button>
-                    <div className="border-t border-slate-100 my-1"></div>
-                    <button 
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                    >
-                      <LogOut size={16} />
-                      ออกจากระบบ
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Page Content */}
-        {currentPage === 'staff-dashboard' && <StaffDashboard userRole={userRole} onNavigatePage={(page) => setCurrentPage(page)} />}
-        {currentPage === 'wi-library' && <WILibrary userRole={userRole} />}
-        {currentPage === 'dashboard' && <Dashboard userRole={userRole} />}
-        {currentPage === 'overview' && <SectionSkillMatrix userRole={userRole} />}
-        {currentPage === 'individual' && <IndividualSkillMatrix userRole={userRole} />}
-        {currentPage === 'compare' && <CompareSkillMatrix userRole={userRole} />}
-        {currentPage === 'approvals' && <Approvals userRole={userRole} />}
-        {currentPage === 'employees' && <EmployeeManagement userRole={userRole} />}
-        {currentPage === 'master-data' && <MasterData userRole={userRole} />}
-        {currentPage === 'training' && <Training userRole={userRole} />}
-        {currentPage === 'reports' && <Reports userRole={userRole} />}
-                    {currentPage === 'working-record' && <WorkingRecord userRole={userRole} />}
-          {currentPage === 'capacity' && <CapacityDashboard userRole={userRole} />}
-          {currentPage === 'evaluation' && <SkillEvaluation userRole={userRole} />}
-
-        {currentPage === 'settings' && (
-          <SettingsPage onNavigateToPermissions={() => setCurrentPage('permissions')} />
-        )}
-        {currentPage === 'permissions' && (
-          <PermissionsPage onBackToSettings={() => setCurrentPage('settings')} />
-        )}
-      </main>
-    </div>
-  );
+export default function App() {
+  const [role,setRole]=useState<Role|null>(null);
+  const [currentPage,setCurrentPage]=useState('');
+  const [showNotifications,setShowNotifications]=useState(false);
+  const [assessmentScope,setAssessmentScope]=useState<ScoreAssessmentScope>();
+  const state=useSkillState();const training=useTrainingRequests();
+  function navigate(id:string,scope?:ScoreAssessmentScope){if(role&&roleCanVisit(id,role)){setAssessmentScope(scope);setCurrentPage(id);setShowNotifications(false);}}
+  if(!role)return <LoginPage onLoginSuccess={value=>{if(Object.hasOwn(ACTORS,value)){const selected=value as Role;setRole(selected);setCurrentPage(roleHome(selected));}}}/>;
+  const page=roleCanVisit(currentPage,role)?currentPage:roleHome(role);
+  const actor=ACTORS[role];
+  const notifications=role==='chief' ? [
+    {id:'chief-training-requests',label:'คำขอฝึกอบรมรอตรวจ',count:training.filter(r=>r.department===actor.department&&r.status==='requested').length},
+    {id:'chief-training-evaluation',label:'รายการรอบันทึกผลอบรม',count:training.filter(r=>r.department===actor.department&&r.status==='scheduled').length},
+  ] : role==='manager' ? [
+    {id:'manager-skill-approvals',label:'คะแนนสกิลรออนุมัติ',count:state.adjustments.filter(a=>a.status==='pending').length},
+    {id:'manager-training-approvals',label:'ผลอบรมรอรับรอง',count:training.filter(r=>r.status==='pending-manager').length},
+  ] : role==='staff' ? [{id:'staff-training-tracking',label:'คำขอฝึกอบรมระหว่างดำเนินการ',count:training.filter(r=>r.employeeId===actor.employeeId&&['requested','scheduled'].includes(r.status)).length}] : [];
+  const count=notifications.reduce((n,item)=>n+item.count,0);
+  return <div className="flex min-h-screen bg-app-surface print:block print:bg-white"><Sidebar currentPage={page} setCurrentPage={navigate} userRole={role}/><main className="ml-64 min-w-0 flex-1 p-6 lg:p-8 print:ml-0 print:p-0"><header className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-4 print:hidden"><div><div className="text-sm font-bold text-blue-800">{ROLE_NAMES[role]}</div><div className="mt-1 text-xs text-slate-500">{rolePage(page,role)?.purpose}</div></div><div className="flex items-center gap-4"><div className="relative"><button aria-label="การแจ้งเตือน" onClick={()=>setShowNotifications(!showNotifications)} className="relative rounded-full p-2 hover:bg-slate-100"><Bell size={20}/>{count>0&&<span className="absolute right-0 top-0 rounded-full bg-amber-500 px-1 text-xs text-white">{count}</span>}</button>{showNotifications&&<div className="absolute right-0 z-50 mt-2 w-80 rounded-xl border border-slate-200 bg-white p-4 shadow-lg"><h2 className="mb-3 font-semibold">รายการของคุณ</h2>{count?notifications.filter(item=>item.count>0).map(item=><button key={item.id} className="block w-full rounded-lg p-3 text-left text-sm text-blue-800 hover:bg-blue-50" onClick={()=>navigate(item.id)}>{item.label} · {item.count} รายการ →</button>):<p className="text-sm text-slate-500">ไม่มีรายการที่ต้องติดตาม</p>}</div>}</div><div className="border-l border-slate-200 pl-4 text-right"><div className="text-sm font-bold text-slate-700">{actor.name}</div><div className="text-xs text-slate-500">{role==='staff'?'Staff':role==='chief'?'Section Chief':role==='manager'?'Department Manager':'System Admin'}</div></div><button aria-label="เปลี่ยนบทบาท / ออกจากระบบ" onClick={()=>{setRole(null);setCurrentPage('');setShowNotifications(false);}} className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-600 hover:bg-slate-100"><LogOut size={16}/><span>เปลี่ยนบทบาท</span></button></div></header>
+    <p className="mb-5 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-xs leading-5 text-blue-800 print:hidden">โหมดสาธิต · ข้อมูลพนักงาน คะแนนย้อนหลัง และรายการฝึกอบรมเป็นข้อมูลตัวอย่าง สามารถทดลองตรวจคำขอ ประเมิน และอนุมัติได้ โดยผลบันทึกอยู่ในเบราว์เซอร์นี้</p>
+    {(getStorageError()||trainingStorageError())&&<p role="alert" className="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-700">{getStorageError()||trainingStorageError()}</p>}
+    <RolePageRouter key={page} page={page} role={role} onNavigate={navigate} assessmentScope={assessmentScope}/>
+  </main></div>;
 }
-
-export default App;

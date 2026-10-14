@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Filter, Play, CheckCircle, AlertTriangle, Clock, Calendar, Activity, Briefcase, BarChart2 } from 'lucide-react';
+import { Plus, Search, Filter, Play, CheckCircle, CheckCircle2, AlertTriangle, Clock, Calendar, Activity, Briefcase, BarChart2, Award, Sparkles, X } from 'lucide-react';
 import Pagination from '../components/Pagination';
 
 interface WorkRecord {
@@ -62,6 +62,29 @@ const mockWorkingRecords: WorkRecord[] = Array.from({ length: 45 }).map((_, i) =
 });
 
 
+const WI_SKILL_MAPPING: Record<string, string[]> = {
+  'QCW001-001': ['A - Circuit Connecting', 'B - Machine Operator', 'C - Inspection Report', 'D - Data Analysis'],
+  'QCW001-002': ['A - Circuit Connecting', 'B - Machine Operator', 'C - Inspection Report', 'D - Data Analysis'],
+  'QCW002-001': ['C - Inspection Report', 'D - Data Analysis'],
+  'QCW004-001': ['A - Circuit Connecting', 'C - Inspection Report', 'D - Data Analysis'],
+  'QCW005-001': ['C - Inspection Report', 'E - Safety Control'],
+  'ENG-M-001': ['B - Machine Operator', 'D - Data Analysis', 'E - Safety Control'],
+  'ENG-M-002': ['C - Inspection Report', 'D - Data Analysis'],
+  'ENG-D-003': ['B - Machine Operator', 'D - Data Analysis'],
+  'PROD-010-01': ['A - Circuit Connecting', 'B - Machine Operator', 'E - Safety Control'],
+  'PROD-010-02': ['B - Machine Operator', 'C - Inspection Report', 'E - Safety Control'],
+  'PROD-020-01': ['B - Machine Operator', 'E - Safety Control'],
+  'PROD-030-01': ['B - Machine Operator', 'E - Safety Control']
+};
+
+const ALL_SKILL_TYPES = [
+  'A - Circuit Connecting',
+  'B - Machine Operator',
+  'C - Inspection Report',
+  'D - Data Analysis',
+  'E - Safety Control'
+];
+
 export default function WorkingRecord({ userRole = 'admin' }: { userRole?: string }) {
   const isStaff = userRole === 'staff' || userRole === 'clerk';
   const isChief = userRole === 'chief';
@@ -69,6 +92,74 @@ export default function WorkingRecord({ userRole = 'admin' }: { userRole?: strin
 
   const [records, setRecords] = useState(mockWorkingRecords);
   const [isFormOpen, setIsFormOpen] = useState(false);
+
+  // Form States
+  const [formDate, setFormDate] = useState(new Date().toISOString().split('T')[0]);
+  const [formSn, setFormSn] = useState('');
+  const [formEmployee, setFormEmployee] = useState(isStaff ? 'นายสมชาย ใจดี' : 'นายสมชาย ใจดี');
+  const [formWi, setFormWi] = useState('QCW001-001');
+  const [formSkillType, setFormSkillType] = useState('A - Circuit Connecting');
+  const [formJobType, setFormJobType] = useState<'Normal' | 'Rework QC' | 'Rework Mfg'>('Normal');
+  const [formStartTime, setFormStartTime] = useState('08:00');
+  const [formFinishTime, setFormFinishTime] = useState('12:00');
+  const [formNc, setFormNc] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const handleWiChange = (newWi: string) => {
+    setFormWi(newWi);
+    const availableSkills = WI_SKILL_MAPPING[newWi] || ALL_SKILL_TYPES;
+    if (!availableSkills.includes(formSkillType)) {
+      setFormSkillType(availableSkills[0]);
+    }
+  };
+
+  const handleSubmitJob = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    let actualHrs = 4.0;
+    if (formStartTime && formFinishTime) {
+      const [startH, startM] = formStartTime.split(':').map(Number);
+      const [finH, finM] = formFinishTime.split(':').map(Number);
+      const diff = (finH * 60 + finM) - (startH * 60 + startM);
+      if (diff > 0) {
+        actualHrs = Number((diff / 60).toFixed(1));
+      }
+    }
+
+    const assignedEmployee = isStaff ? 'นายสมชาย ใจดี' : formEmployee;
+    let dept = 'QC Section';
+    if (assignedEmployee === 'นางสาวแนน สุขใจ') dept = 'Engineering';
+    else if (assignedEmployee === 'นายสมศักดิ์ มั่นคง') dept = 'Production';
+
+    const generatedSn = formSn.trim() || `PP06${Math.floor(10 + Math.random() * 89)}A01`;
+
+    const newRecord: WorkRecord = {
+      id: `JOB-${Date.now().toString().slice(-6)}`,
+      date: formDate || new Date().toISOString().split('T')[0],
+      sn: generatedSn,
+      employee: assignedEmployee,
+      department: dept,
+      wi: formWi,
+      skillType: formSkillType,
+      type: formJobType,
+      startTime: formStartTime || '08:00',
+      finishTime: formFinishTime,
+      actualHrs: formFinishTime ? actualHrs : 0,
+      standardHrs: 3.5,
+      status: formFinishTime ? 'เสร็จสมบูรณ์' : 'กำลังดำเนินการ',
+      nc: formJobType !== 'Normal' ? (formNc || 'NC-2610-099') : null
+    };
+
+    setRecords([newRecord, ...records]);
+    setSuccessMessage(`บันทึกข้อมูลงาน ${generatedSn} (${formWi} - ${formSkillType}) สำหรับ ${assignedEmployee} เรียบร้อยแล้ว!`);
+    setTimeout(() => setSuccessMessage(''), 5000);
+    setIsFormOpen(false);
+
+    // Reset inputs
+    setFormSn('');
+    setFormNc('');
+    setFormJobType('Normal');
+  };
 
   // Table Filters (Affects both Table and KPIs base)
   const [filterDate, setFilterDate] = useState('');
@@ -146,6 +237,19 @@ export default function WorkingRecord({ userRole = 'admin' }: { userRole?: strin
         </button>
       </div>
 
+      {/* Success Notification Toast */}
+      {successMessage && (
+        <div className="bg-emerald-50 border-2 border-emerald-400 text-emerald-800 px-4 py-3 rounded-xl shadow-sm flex items-center justify-between animate-fade-in">
+          <div className="flex items-center gap-3">
+            <CheckCircle2 className="text-emerald-600 shrink-0" size={22} />
+            <span className="font-bold text-sm">{successMessage}</span>
+          </div>
+          <button onClick={() => setSuccessMessage('')} className="text-emerald-600 hover:text-emerald-800 text-sm font-bold">
+            <X size={18} />
+          </button>
+        </div>
+      )}
+
       {/* KPI Section with its own separate filter */}
       <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
@@ -200,48 +304,182 @@ export default function WorkingRecord({ userRole = 'admin' }: { userRole?: strin
 
       {/* Inline Form */}
       {isFormOpen && (
-        <div className="bg-white p-5 rounded-xl border border-indigo-200 shadow-lg mb-6">
-          <h2 className="text-lg font-bold text-indigo-900 mb-4 border-b pb-2">แบบฟอร์มบันทึกมอบหมายงาน (Job Assignment)</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Job S/N</label>
-              <input type="text" placeholder="e.g. PP0600A05" className="w-full border border-slate-300 rounded-lg p-2 text-sm" />
-            </div>
-            {!isStaff && (
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">พนักงาน</label>
-                <select className="w-full border border-slate-300 rounded-lg p-2 text-sm"><option>นายสมชาย ใจดี</option><option>นางสาวแนน สุขใจ</option></select>
+        <form onSubmit={handleSubmitJob} className="bg-white p-6 rounded-2xl border-2 border-indigo-200 shadow-xl mb-6">
+          <div className="flex items-center justify-between pb-3 mb-4 border-b border-indigo-100">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-indigo-100 text-indigo-700 rounded-lg">
+                <Briefcase size={20} />
               </div>
-            )}
-            <div className={isStaff ? 'col-span-2' : ''}>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">W/I</label>
-              <select className="w-full border border-slate-300 rounded-lg p-2 text-sm"><option>QCW001-001</option><option>PROD-010-01</option></select>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base font-bold text-slate-800">แบบฟอร์มบันทึกมอบหมายงาน (Job Assignment & Skill Practice)</h2>
+                  <span className="bg-indigo-100 text-indigo-700 text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <Sparkles size={11} /> ISO 17025 Tracked
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500">ระบุ W/I พร้อมทักษะ (Skill Type) ที่ปฏิบัติเพื่อสะสมประวัติชั่วโมงและผลงานสำหรับ Skill Matrix</p>
+              </div>
             </div>
+            <button type="button" onClick={() => setIsFormOpen(false)} className="text-slate-400 hover:text-slate-600 p-1">
+              <X size={20} />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+            {/* วันที่ */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">ประเภทงาน (Job Type)</label>
-              <select className="w-full border border-slate-300 rounded-lg p-2 text-sm"><option>Normal</option><option>Rework QC</option><option>Rework Mfg</option></select>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">วันที่ปฏิบัติงาน</label>
+              <input 
+                type="date" 
+                value={formDate} 
+                onChange={e => setFormDate(e.target.value)} 
+                required
+                className="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-semibold bg-white focus:ring-2 focus:ring-indigo-500 outline-none" 
+              />
             </div>
+
+            {/* Job S/N */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">เริ่ม (Start)</label>
-              <input type="time" defaultValue="08:00" className="w-full border border-slate-300 rounded-lg p-2 text-sm" />
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Job S/N (หมายเลขชิ้นงาน)</label>
+              <input 
+                type="text" 
+                placeholder="e.g. PP0600A05 (เว้นว่างเพื่อ Auto)" 
+                value={formSn} 
+                onChange={e => setFormSn(e.target.value)} 
+                className="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-mono focus:ring-2 focus:ring-indigo-500 outline-none" 
+              />
             </div>
+
+            {/* พนักงาน */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">เสร็จ (Finish)</label>
-              <input type="time" className="w-full border border-slate-300 rounded-lg p-2 text-sm" />
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">พนักงานผู้ปฏิบัติ</label>
+              {isStaff ? (
+                <div className="w-full border border-slate-200 bg-slate-100 rounded-lg p-2.5 text-sm font-bold text-slate-700 flex items-center justify-between">
+                  <span>นายสมชาย ใจดี</span>
+                  <span className="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded font-mono">STAFF</span>
+                </div>
+              ) : (
+                <select 
+                  value={formEmployee} 
+                  onChange={e => setFormEmployee(e.target.value)} 
+                  className="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-semibold bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                >
+                  <option value="นายสมชาย ใจดี">นายสมชาย ใจดี (QC Section)</option>
+                  <option value="นายกฤต พร้อมใจ">นายกฤต พร้อมใจ (QC Section)</option>
+                  <option value="นางสมศรี มีสุข">นางสมศรี มีสุข (QC Section)</option>
+                  <option value="นางสาวแนน สุขใจ">นางสาวแนน สุขใจ (Engineering)</option>
+                  <option value="นายสมศักดิ์ มั่นคง">นายสมศักดิ์ มั่นคง (Production)</option>
+                </select>
+              )}
             </div>
+
+            {/* W/I */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">NC Number (Optional)</label>
-              <select className="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
-                <option value="">-- ไม่ระบุ (งานปกติ) --</option>
-                <option value="NC-001">NC-001 : รอยขีดข่วนตัวถัง</option>
-                <option value="NC-002">NC-002 : สีหลุดร่อน</option>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">ขั้นตอนงาน (W/I)</label>
+              <select 
+                value={formWi} 
+                onChange={e => handleWiChange(e.target.value)} 
+                className="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-semibold bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+              >
+                {uniqueWIs.map(wi => (
+                  <option key={wi} value={wi}>{wi}</option>
+                ))}
               </select>
             </div>
-            <div className="flex items-end">
-              <button className="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg text-sm hover:bg-indigo-700">บันทึกข้อมูลงาน</button>
+
+            {/* Skill Type - Highlighted */}
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-bold text-indigo-700 uppercase mb-1 flex items-center gap-1.5">
+                <Award size={14} className="text-indigo-600" />
+                ทักษะที่ปฏิบัติ (Skill Type) <span className="text-rose-500">*จำเป็นสำหรับ Matrix</span>
+              </label>
+              <select 
+                value={formSkillType} 
+                onChange={e => setFormSkillType(e.target.value)} 
+                className="w-full border-2 border-indigo-400 bg-indigo-50/50 text-indigo-900 font-bold rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm"
+              >
+                {(WI_SKILL_MAPPING[formWi] || ALL_SKILL_TYPES).map(st => (
+                  <option key={st} value={st}>{st}</option>
+                ))}
+              </select>
+              <span className="text-[11px] text-indigo-600 mt-1 block font-medium">
+                💡 เชื่อมโยงตามรายการทักษะที่อนุมัติใน W/I: <strong className="font-bold">{formWi}</strong>
+              </span>
+            </div>
+
+            {/* ประเภทงาน (Job Type) */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">ประเภทงาน (Job Type)</label>
+              <select 
+                value={formJobType} 
+                onChange={e => setFormJobType(e.target.value as any)} 
+                className="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-semibold bg-white focus:ring-2 focus:ring-indigo-500 outline-none"
+              >
+                <option value="Normal">Normal (งานปกติ)</option>
+                <option value="Rework QC">Rework QC (งานแก้ QC)</option>
+                <option value="Rework Mfg">Rework Mfg (งานแก้ฝ่ายผลิต)</option>
+              </select>
+            </div>
+
+            {/* NC Number (Optional) */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                NC Number {formJobType === 'Normal' ? '(ไม่ระบุ)' : '*'}
+              </label>
+              <select 
+                value={formNc} 
+                onChange={e => setFormNc(e.target.value)} 
+                disabled={formJobType === 'Normal'}
+                className={`w-full border rounded-lg p-2.5 text-sm font-semibold outline-none ${formJobType === 'Normal' ? 'bg-slate-100 text-slate-400 border-slate-200' : 'bg-rose-50 text-rose-800 border-rose-300 focus:ring-2 focus:ring-rose-500'}`}
+              >
+                <option value="">-- ไม่ระบุ (งานปกติ) --</option>
+                <option value="NC-2610-001">NC-2610-001 : รอยขีดข่วนตัวถัง</option>
+                <option value="NC-2610-002">NC-2610-002 : ค่าความต้านทานเกินพิกัด</option>
+                <option value="NC-2610-003">NC-2610-003 : สีหลุดร่อน</option>
+                <option value="NC-2610-004">NC-2610-004 : ขั้วต่อสายหลวม</option>
+              </select>
+            </div>
+
+            {/* เริ่ม (Start) */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">เวลาเริ่ม (Start)</label>
+              <input 
+                type="time" 
+                value={formStartTime} 
+                onChange={e => setFormStartTime(e.target.value)} 
+                className="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-bold bg-white focus:ring-2 focus:ring-indigo-500 outline-none" 
+              />
+            </div>
+
+            {/* เสร็จ (Finish) */}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">เวลาเสร็จ (Finish)</label>
+              <input 
+                type="time" 
+                value={formFinishTime} 
+                onChange={e => setFormFinishTime(e.target.value)} 
+                className="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-bold bg-white focus:ring-2 focus:ring-indigo-500 outline-none" 
+              />
+              <span className="text-[10px] text-slate-400 mt-0.5 block">เว้นว่างได้หากกำลังทำ</span>
             </div>
           </div>
-        </div>
+
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
+            <button 
+              type="button" 
+              onClick={() => setIsFormOpen(false)} 
+              className="px-5 py-2.5 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 font-bold text-sm transition-colors"
+            >
+              ยกเลิก
+            </button>
+            <button 
+              type="submit" 
+              className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-sm transition-colors shadow-md flex items-center gap-2"
+            >
+              <CheckCircle size={16} /> บันทึกข้อมูลงาน
+            </button>
+          </div>
+        </form>
       )}
 
       {/* Table Section */}

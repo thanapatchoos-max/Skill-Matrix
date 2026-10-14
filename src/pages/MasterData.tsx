@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Settings, ShieldAlert, Check, Search, RefreshCw, Layers, ArrowLeft, Save, X, Eye, EyeOff, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Edit, Trash2, Settings, ShieldAlert, Check, RefreshCw, Layers, ArrowLeft, Save, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FilterBar, FilterToggle } from '../components/FilterBar';
+import { Field, inputClass } from '../components/Phase1Shared';
 
 interface SkillType {
   code: string;
@@ -430,44 +432,12 @@ export function MasterData({ userRole = 'admin' }: { userRole?: string }) {
         <div className="lg:col-span-8 space-y-4">
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-4">
             
-            {/* Filter & Search Bar */}
-            <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-              <div className="relative flex-1 w-full">
-                <Search size={16} className="absolute left-3 top-3 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="ค้นหารหัส W/I, ชื่อขั้นตอน หรือหมวดหมู่..."
-                  value={searchQuery}
-                  onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 pl-9 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div className="flex items-center gap-2 w-full md:w-auto">
-                <select
-                  value={deptFilter}
-                  onChange={e => { setDeptFilter(e.target.value); setCurrentPage(1); }}
-                  className="bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="ALL">ทุกแผนก</option>
-                  <option value="QC Section">QC Section</option>
-                  <option value="Production">Production</option>
-                  <option value="Engineering">Engineering</option>
-                </select>
-
-                <button
-                  onClick={() => { setShowArchived(!showArchived); setCurrentPage(1); }}
-                  className={`px-3 py-2 rounded-lg text-xs font-semibold border transition-colors flex items-center gap-1.5 whitespace-nowrap ${
-                    showArchived 
-                      ? 'bg-amber-100 border-amber-300 text-amber-800' 
-                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                  }`}
-                >
-                  {showArchived ? <Eye size={14} /> : <EyeOff size={14} />}
-                  {showArchived ? 'ซ่อนรายการที่ลบ' : 'แสดงคลัง Soft-deleted'}
-                </button>
-              </div>
-            </div>
+            <FilterBar title="ค้นหามาตรฐานงาน W/I" onReset={()=>{setSearchQuery('');setDeptFilter('ALL');setShowArchived(false);setCurrentPage(1);}} footer={<FilterToggle checked={showArchived} onChange={checked=>{setShowArchived(checked);setCurrentPage(1);}}>รวมรายการที่เก็บเข้าคลัง</FilterToggle>}>
+              <Field label="ค้นหามาตรฐานงาน"><input placeholder="รหัส W/I ชื่อขั้นตอน หรือหมวดหมู่" value={searchQuery} onChange={e=>{setSearchQuery(e.target.value);setCurrentPage(1);}} className={inputClass}/></Field>
+              <Field label="แผนก"><select value={deptFilter} onChange={e=>{setDeptFilter(e.target.value);setCurrentPage(1);}} className={inputClass}>
+                <option value="ALL">ทุกแผนก</option><option value="QC Section">QC Section</option><option value="Production">Production</option><option value="Engineering">Engineering</option>
+              </select></Field>
+            </FilterBar>
 
             {/* W/I Table */}
             <div className="overflow-x-auto rounded-lg border border-slate-200">

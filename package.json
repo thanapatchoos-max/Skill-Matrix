@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test scripts/phase1-core.test.cjs scripts/role-pages.test.cjs scripts/manager-analytics.test.cjs scripts/demo-data.test.cjs scripts/assessment-pdf.test.cjs",
+    "test:ui": "npm run build && node scripts/role-pages-ui.test.mjs"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -16,6 +18,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^13.4.0",
     "lucide-react": "^1.47.0",
+    "pdfmake": "0.2.20",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-is": "^19.3.0",
@@ -25,6 +28,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.13.3",
+    "@types/pdfmake": "0.2.13",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
