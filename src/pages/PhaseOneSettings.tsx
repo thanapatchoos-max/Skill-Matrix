@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ShieldCheck, RotateCcw, Check } from 'lucide-react';
 import { buttonClass, panelClass } from '../components/Phase1Shared';
 import { resetSkillDemoState } from '../data/phase1Store';
+import { resetTrainingDemoState } from '../data/trainingStore';
 
 export default function PhaseOneSettings({onPermissions,permissions=false}:{onPermissions:()=>void;permissions?:boolean}) {
   const [resetMessage, setResetMessage] = useState('');
@@ -15,6 +16,7 @@ export default function PhaseOneSettings({onPermissions,permissions=false}:{onPe
   function handleReset() {
     if (window.confirm('คุณต้องการรีเซ็ตข้อมูลตัวอย่างกลับเป็นค่าเริ่มต้น (300 คน) ใช่หรือไม่?')) {
       resetSkillDemoState();
+      resetTrainingDemoState();
       setResetMessage('รีเซ็ตข้อมูลตัวอย่างเป็นค่าเริ่มต้น 300 คนเรียบร้อยแล้ว');
       setTimeout(() => setResetMessage(''), 4000);
     }

@@ -9,7 +9,16 @@ const listeners=new Set<()=>void>();
 function read(): TrainingRequest[] {
   try {
     const text=localStorage.getItem(KEY);
-    if(text) { const data=JSON.parse(text); if(data.demoRevision!==DEMO_REVISION || !Array.isArray(data.records)) throw new Error(); return data.records; }
+    if(text) {
+      const data=JSON.parse(text);
+      if(!Array.isArray(data.records)) throw new Error();
+      if(data.demoRevision !== DEMO_REVISION) {
+        const migrated = populateTrainingDemo(data.records);
+        localStorage.setItem(KEY, JSON.stringify({ demoRevision: DEMO_REVISION, records: migrated }));
+        return migrated;
+      }
+      return data.records;
+    }
     const legacy=localStorage.getItem(LEGACY_KEY);
     const saved=legacy?JSON.parse(legacy):null;
     if(saved && !Array.isArray(saved)) throw new Error();
@@ -17,7 +26,15 @@ function read(): TrainingRequest[] {
     localStorage.setItem(KEY,JSON.stringify({demoRevision:DEMO_REVISION,records}));
     return records;
   }
-  catch { throw new Error('อ่านข้อมูลฝึกอบรมไม่ได้ กรุณาตรวจสอบข้อมูลในเบราว์เซอร์'); }
+  catch {
+    try {
+      const fallback = trainingDemo();
+      localStorage.setItem(KEY, JSON.stringify({ demoRevision: DEMO_REVISION, records: fallback }));
+      return fallback;
+    } catch {
+      throw new Error('อ่านข้อมูลฝึกอบรมไม่ได้ กรุณาตรวจสอบข้อมูลในเบราว์เซอร์');
+    }
+  }
 }
 let error='';
 let records:TrainingRequest[]=[];
@@ -35,3 +52,13 @@ export const submitTraining=(form:Parameters<typeof requestTraining>[2])=>update
 export const decideTrainingRequest=(id:string,approve:boolean,date:string,remark:string)=>update(current=>reviewTrainingRequest(current,'chief',id,approve,date,remark));
 export const scoreTraining=(id:string,theory:number,practical:number,note:string)=>update(current=>evaluateTraining(current,'chief',id,theory,practical,note));
 export const approveTrainingResult=(id:string,approve:boolean,remark:string)=>update(current=>certifyTraining(current,'manager',id,approve,remark));
+export function resetTrainingDemoState() {
+  localStorage.removeItem(KEY);
+  localStorage.removeItem(LEGACY_KEY);
+  const fresh = trainingDemo();
+  localStorage.setItem(KEY, JSON.stringify({ demoRevision: DEMO_REVISION, records: fresh }));
+  records = fresh;
+  error = '';
+  listeners.forEach(listener => listener());
+}
+
