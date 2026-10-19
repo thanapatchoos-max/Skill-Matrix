@@ -97,15 +97,7 @@ const pagePermissionSchema: PageFeature[] = [
       { key: 'capacity_view', label: 'เข้าดูกำลังคน (View)', shortCode: 'view' },
     ]
   },
-  {
-    pageId: 'page_wi_library',
-    pageName: '10. คลังคู่มือ W/I (W/I Library)',
-    description: 'เอกสารคู่มือปฏิบัติงานมาตรฐาน',
-    actions: [
-      { key: 'wi_view', label: 'เข้าอ่านคู่มือ (View)', shortCode: 'view' },
-      { key: 'wi_manage', label: 'จัดการคู่มือ (Manage)', shortCode: 'edit' },
-    ]
-  },
+
   {
     pageId: 'page_employees',
     pageName: '11. จัดการพนักงาน (Employee Management)',
@@ -187,7 +179,6 @@ const initialRoles: PermissionRole[] = [
       individual_view: true, individual_export: true,
       compare_view: true, compare_export: true,
       capacity_view: true,
-      wi_view: false, wi_manage: false,
       emp_view: true, emp_create: false, emp_edit: false, emp_delete: false,
       master_view: true, master_manage: false,
       reports_view: true, reports_export: true,
@@ -211,7 +202,6 @@ const initialRoles: PermissionRole[] = [
       individual_view: true, individual_export: true,
       compare_view: true, compare_export: true,
       capacity_view: true,
-      wi_view: true, wi_manage: true,
       emp_view: true, emp_create: true, emp_edit: true, emp_delete: false,
       master_view: true, master_manage: true,
       reports_view: true, reports_export: true,
@@ -222,7 +212,7 @@ const initialRoles: PermissionRole[] = [
     id: 'role-staff',
     name: 'พนักงานทั่วไป (Staff)',
     code: 'STAFF',
-    description: 'สิทธิ์ดูเฉพาะข้อมูลส่วนตัว (My Profile), บันทึกการทำงานของตนเอง, ดูคู่มือ W/I',
+    description: 'สิทธิ์ดูเฉพาะข้อมูลส่วนตัว (My Profile) และบันทึกการทำงานของตนเอง',
     userCount: 65,
     isSystemRole: true,
     permissions: {
@@ -235,7 +225,6 @@ const initialRoles: PermissionRole[] = [
       individual_view: true, individual_export: false,
       compare_view: false, compare_export: false,
       capacity_view: false,
-      wi_view: true, wi_manage: false,
       emp_view: false, emp_create: false, emp_edit: false, emp_delete: false,
       master_view: false, master_manage: false,
       reports_view: false, reports_export: false,

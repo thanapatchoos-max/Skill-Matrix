@@ -5,7 +5,6 @@ import { Metric } from '../../components/Phase1Shared';
 import { RolePageIntro, TaskCard } from '../../components/RolePageIntro';
 import MyScoresPage from './MyScoresPage';
 import YearlySkill from '../YearlySkill';
-import { WILibrary } from '../WILibrary';
 export function StaffHomePage({onNavigate}:{onNavigate:(page:string)=>void}) {
   const state=useSkillState();
   const employee=employeesForYear(state,bangkokYear()).find(e=>e.id===ACTORS.staff.employeeId);
@@ -14,4 +13,3 @@ export function StaffHomePage({onNavigate}:{onNavigate:(page:string)=>void}) {
 }
 export function StaffSkillsPage(){return <MyScoresPage/>;}
 export function StaffYearlyPage(){return <YearlySkill userRole="staff" title="พัฒนาการของฉัน"/>;}
-export function StaffGuidePage(){return <div className="space-y-5"><RolePageIntro title="คู่มือสำหรับพนักงาน" description="อ่านมาตรฐาน W/I เพื่อเตรียมตัวก่อนปฏิบัติงานหรือฝึกอบรม"/><WILibrary userRole="staff"/></div>;}

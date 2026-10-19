@@ -204,7 +204,7 @@ export function StaffDashboard({ onNavigatePage, userRole = 'staff' }: StaffDash
           </div>
 
           {/* Quick Links & Shortcut Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div 
               onClick={() => onNavigatePage && onNavigatePage('individual')}
               className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-blue-400 hover:shadow-md transition-all cursor-pointer flex items-center justify-between group"
@@ -217,20 +217,6 @@ export function StaffDashboard({ onNavigatePage, userRole = 'staff' }: StaffDash
                 <div className="text-xs text-slate-400">ตรวจสอบ Radar Chart และทักษะ A, B, C, D, E</div>
               </div>
               <ChevronRight size={20} className="text-slate-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
-            </div>
-
-            <div 
-              onClick={() => onNavigatePage && onNavigatePage('wi-library')}
-              className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-blue-400 hover:shadow-md transition-all cursor-pointer flex items-center justify-between group"
-            >
-              <div className="space-y-1">
-                <div className="text-xs font-bold text-purple-600 flex items-center gap-1">
-                  <BookOpen size={14} /> คู่มือปฏิบัติงาน
-                </div>
-                <div className="font-bold text-slate-800 text-base">คลังเอกสาร W/I (Library)</div>
-                <div className="text-xs text-slate-400">เปิดอ่านคู่มือและดาวน์โหลด PDF ก่อนสอบ OJT</div>
-              </div>
-              <ChevronRight size={20} className="text-slate-300 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
             </div>
           </div>
 
