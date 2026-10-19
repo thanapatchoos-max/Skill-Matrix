@@ -1,8 +1,10 @@
+import { Avatar } from '../components/Avatar';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { ArrowRight, BarChart3, Check, ClipboardCheck, GraduationCap, ShieldCheck, UserCheck, Users, Briefcase, Eye, EyeOff, LockKeyhole } from 'lucide-react';
-import { ACTORS } from '../data/phase1Core';
+import { ACTORS, bangkokYear, employeesForYear } from '../data/phase1Core';
 import type { Role } from '../data/phase1Core';
+import { useSkillState } from '../data/phase1Store';
 
 const roles = [
   { id: 'staff', name: 'Staff', title: 'พนักงาน', description: 'ดูคะแนนของฉันและยื่นขอฝึกอบรม', icon: Users, color: 'text-blue-600', background: 'bg-blue-50' },
@@ -12,11 +14,13 @@ const roles = [
 ] as const;
 
 export function LoginPage({ onLoginSuccess }: { onLoginSuccess: (role: string) => void }) {
+  const state = useSkillState();
   const [selectedRole, setSelectedRole] = useState<Role>('staff');
   const [username,setUsername] = useState('staff.demo');
   const [password,setPassword] = useState('Demo@2026');
   const [showPassword,setShowPassword] = useState(false);
   const actor = ACTORS[selectedRole];
+  const actorEmployee = employeesForYear(state, bangkokYear()).find(e => e.id === actor.employeeId);
   const roleTitle = roles.find(role => role.id === selectedRole)!.title;
   function handleLogin(event: FormEvent) {
     event.preventDefault();
@@ -57,7 +61,7 @@ export function LoginPage({ onLoginSuccess }: { onLoginSuccess: (role: string) =
             </div>
           </fieldset>
           <div className="mt-4 grid grid-cols-1 gap-3"><div><label htmlFor="login-username" className="mb-1.5 block text-sm font-semibold text-slate-700">Username</label><div className="relative"><Users size={16} className="absolute left-3 top-3 text-slate-400"/><input id="login-username" name="username" autoComplete="username" maxLength={100} value={username} onChange={event=>setUsername(event.target.value)} placeholder="กรอกชื่อผู้ใช้" className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"/></div></div><div><label htmlFor="login-password" className="mb-1.5 block text-sm font-semibold text-slate-700">Password</label><div className="relative"><LockKeyhole size={16} className="absolute left-3 top-3 text-slate-400"/><input id="login-password" name="password" type={showPassword?'text':'password'} autoComplete="current-password" maxLength={100} value={password} onChange={event=>setPassword(event.target.value)} placeholder="กรอกรหัสผ่าน" className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-10 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500"/><button type="button" aria-label={showPassword?'ซ่อนรหัสผ่าน':'แสดงรหัสผ่าน'} aria-pressed={showPassword} onClick={()=>setShowPassword(!showPassword)} className="absolute right-2 top-2 rounded-lg p-1 text-slate-400 hover:bg-slate-100">{showPassword?<EyeOff size={17}/>:<Eye size={17}/>}</button></div></div></div>
-          <div className="mt-3 flex items-center gap-3 rounded-xl bg-blue-50/70 px-4 py-2" aria-live="polite"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500"><Users size={18}/></span><div className="min-w-0"><p className="text-xs text-slate-500">บัญชีตัวอย่าง · {roleTitle}</p><p className="mt-0.5 text-sm font-semibold text-slate-700">{actor.name}</p></div></div>
+          <div className="mt-3 flex items-center gap-3 rounded-xl bg-blue-50/70 px-4 py-2" aria-live="polite"><Avatar src={actorEmployee?.avatarUrl} name={actor.name} size="sm"/><div className="min-w-0"><p className="text-xs text-slate-500">บัญชีตัวอย่าง · {roleTitle}</p><p className="mt-0.5 text-sm font-semibold text-slate-700">{actor.name}</p></div></div>
           <button type="submit" className="mt-4 flex min-h-11 w-full items-center justify-center gap-3 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">เข้าสู่ระบบ <ArrowRight size={18}/></button>
           <p className="mt-3 text-center text-xs leading-5 text-slate-500">ช่องบัญชีเป็นตัวอย่างสำหรับแสดงหน้าจอ · โหมดสาธิตเข้าใช้งานตามบทบาทที่เลือก</p>
         </form>

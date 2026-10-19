@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Download, Search, Filter, ChevronDown, Users, Award, TrendingUp, AlertTriangle, Eye, Grid, ChevronLeft, ChevronRight, Edit3, Check, X, CheckCircle } from 'lucide-react';
+import { Avatar } from '../components/Avatar';
+import { bangkokYear, employeesForYear } from '../data/phase1Core';
+import { useSkillState } from '../data/phase1Store';
 
 interface WIMaster {
   code: string;
@@ -145,6 +148,10 @@ export default function SectionSkillMatrix({ userRole = 'admin' }: { userRole?: 
   const isChief = userRole === 'chief';
   const isAdmin = userRole === 'admin';
   const canEdit = isChief || isAdmin;
+
+  const skillState = useSkillState();
+  const allStateEmployees = employeesForYear(skillState, bangkokYear());
+  const getEmpAvatar = (id: string) => allStateEmployees.find(e => e.id === id)?.avatarUrl;
 
   const [employees, setEmployees] = useState<EmployeeSkill[]>(mockEmployees);
   const [department, setDepartment] = useState('QC Section');
@@ -501,8 +508,13 @@ export default function SectionSkillMatrix({ userRole = 'admin' }: { userRole?: 
                     return (
                       <tr key={emp.id} className="hover:bg-blue-50/30 transition-colors border-b border-slate-100 group">
                         <td className="p-4 border-r border-slate-200 bg-white group-hover:bg-blue-50/20">
-                          <div className="font-bold text-slate-800 group-hover:text-blue-700 transition-colors">{emp.name}</div>
-                          <div className="text-xs text-slate-400 font-mono mt-0.5">{emp.id} · <span className="text-slate-500">{emp.role}</span></div>
+                          <div className="flex items-center gap-3">
+                            <Avatar src={getEmpAvatar(emp.id)} name={emp.name} size="sm" />
+                            <div>
+                              <div className="font-bold text-slate-800 group-hover:text-blue-700 transition-colors">{emp.name}</div>
+                              <div className="text-xs text-slate-400 font-mono mt-0.5">{emp.id} · <span className="text-slate-500">{emp.role}</span></div>
+                            </div>
+                          </div>
                         </td>
 
                         {activeWIs.map(wi => (
@@ -728,7 +740,10 @@ export default function SectionSkillMatrix({ userRole = 'admin' }: { userRole?: 
             <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-1.5">
               <div className="flex justify-between items-center">
                 <span className="text-slate-500">พนักงานเป้าหมาย:</span>
-                <strong className="text-slate-800 font-bold">{editTarget.employeeName} ({editTarget.employeeId})</strong>
+                <div className="flex items-center gap-2">
+                  <Avatar src={getEmpAvatar(editTarget.employeeId)} name={editTarget.employeeName} size="xs" />
+                  <strong className="text-slate-800 font-bold">{editTarget.employeeName} ({editTarget.employeeId})</strong>
+                </div>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-slate-500">W/I ที่รับการประเมิน:</span>

@@ -5,6 +5,7 @@ import { ACTORS, bangkokYear, employeesForYear, LEVEL_LABELS } from '../../data/
 import { useSkillState } from '../../data/phase1Store';
 import { individualAssessment } from '../../data/skillAssessment';
 import { EmptyState, Field, inputClass, LevelBadge, Metric, panelClass } from '../../components/Phase1Shared';
+import { Avatar } from '../../components/Avatar';
 
 export default function MyScoresPage() {
   const state = useSkillState();
@@ -37,8 +38,14 @@ export default function MyScoresPage() {
       <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-800"><User/>ดูคะแนนของฉัน</h1>
       <p className="mt-1 text-sm text-slate-500">ดูคะแนนที่ยืนยันแล้วและทบทวนทักษะของตนเอง · ปี {bangkokYear()}</p>
     </div>
-    <div className={`${panelClass} flex flex-wrap items-center justify-between gap-3 p-5`}>
-      <div><h2 className="font-bold text-slate-800">{employee.name}</h2><p className="mt-1 text-sm text-slate-500">{employee.id} · {employee.department} · {employee.position}</p></div>
+    <div className={`${panelClass} flex flex-wrap items-center justify-between gap-4 p-5`}>
+      <div className="flex items-center gap-4">
+        <Avatar src={employee.avatarUrl} name={employee.name} size="lg" className="ring-2 ring-white shadow-xs" />
+        <div>
+          <h2 className="text-lg font-bold text-slate-800">{employee.name}</h2>
+          <p className="mt-0.5 text-sm text-slate-500">{employee.id} · {employee.department} · {employee.position}</p>
+        </div>
+      </div>
       <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">คะแนนที่ยืนยันแล้ว</span>
     </div>
     <div className="grid gap-4 md:grid-cols-3">
