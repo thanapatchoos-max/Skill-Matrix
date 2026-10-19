@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Plus, Edit, Trash2, Settings, ShieldAlert, Check, RefreshCw, Layers, ArrowLeft, Save, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { FilterBar, FilterToggle } from '../components/FilterBar';
 import { Field, inputClass } from '../components/Phase1Shared';
+import { Pagination } from '../components/Pagination';
 
 interface SkillType {
   code: string;
@@ -68,6 +69,7 @@ export function MasterData({ userRole = 'admin' }: { userRole?: string }) {
   const [showArchived, setShowArchived] = useState(false);
   const [activeTab, setActiveTab] = useState<'wis' | 'skillTypes'>('wis');
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   // Inline Form State (No Popup Modal!)
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -105,9 +107,9 @@ export function MasterData({ userRole = 'admin' }: { userRole?: string }) {
   });
 
   // Pagination calculation
-  const totalPages = Math.ceil(filteredWIs.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedWIs = filteredWIs.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredWIs.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedWIs = filteredWIs.slice(startIndex, startIndex + pageSize);
 
   // Handlers for Work Instruction
   const handleOpenAddForm = () => {
@@ -540,39 +542,16 @@ export function MasterData({ userRole = 'admin' }: { userRole?: string }) {
               </table>
             </div>
 
-            {/* PAGINATION / PARTITION CONTROLS (10 items per page) */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 px-1 border-t border-slate-200 text-xs text-slate-500">
-              <div>
-                แสดงผล {filteredWIs.length > 0 ? startIndex + 1 : 0} - {Math.min(startIndex + ITEMS_PER_PAGE, filteredWIs.length)} จากทั้งหมด {filteredWIs.length} รายการ (10 รายการต่อหน้า)
-              </div>
-
-              {/* Styled Pill Pagination: [ < ]  1 OF 2  [ > ] */}
-              <div className="inline-flex items-center bg-white border border-slate-300 rounded-full px-3 py-1 shadow-xs gap-3">
-                <button
-                  type="button"
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                  className="p-1 hover:bg-slate-100 rounded-full disabled:opacity-30 disabled:hover:bg-transparent text-slate-600 transition-colors"
-                  title="หน้าก่อนหน้า"
-                >
-                  <ChevronLeft size={16} className="text-red-500 font-bold" />
-                </button>
-
-                <span className="font-mono font-bold text-slate-800 tracking-wider text-xs select-none">
-                  {currentPage} OF {totalPages || 1}
-                </span>
-
-                <button
-                  type="button"
-                  disabled={currentPage >= totalPages || totalPages === 0}
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                  className="p-1 hover:bg-slate-100 rounded-full disabled:opacity-30 disabled:hover:bg-transparent text-slate-600 transition-colors"
-                  title="หน้าถัดไป"
-                >
-                  <ChevronRight size={16} className="text-red-500 font-bold" />
-                </button>
-              </div>
-            </div>
+            {/* PAGINATION CONTROLS */}
+            <Pagination
+              currentPage={currentPage}
+              totalItems={filteredWIs.length}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={setPageSize}
+              pageSizeOptions={[5, 10, 25, 50]}
+              itemLabel="รายการ"
+            />
 
           </div>
         </div>

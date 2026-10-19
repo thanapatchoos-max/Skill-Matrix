@@ -1,6 +1,8 @@
 // Existing demo employees, consolidated for Phase 1.
 import type { Employee } from './phase1Core';
-export const INITIAL_EMPLOYEES: Employee[] = [
+import { MOCK_EMPLOYEES } from './masterData';
+
+const SEED: Employee[] = [
   {
     "id": "EMP001",
     "name": "นายสมชาย ใจดี",
@@ -319,3 +321,27 @@ export const INITIAL_EMPLOYEES: Employee[] = [
     ]
   }
 ];
+
+const RESERVED = new Set([...SEED.map(e => e.id), 'EMP012', 'EMP013']);
+
+const EXTRA_EMPLOYEES: Employee[] = MOCK_EMPLOYEES
+  .filter(emp => !RESERVED.has(emp.id))
+  .map(emp => {
+    const department = emp.department === 'Production Section' ? 'Production'
+      : emp.department === 'Engineering Section' ? 'Engineering'
+      : emp.department === 'Maintenance Section' ? 'Engineering'
+      : emp.department === 'IT Section' ? 'QC Section'
+      : emp.department;
+
+    return {
+      id: emp.id,
+      name: emp.name,
+      role: emp.role,
+      position: emp.position,
+      department,
+      scores: emp.skills,
+      assignedSkills: Object.keys(emp.skills),
+    };
+  });
+
+export const INITIAL_EMPLOYEES: Employee[] = [...SEED, ...EXTRA_EMPLOYEES];

@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // MASTER DATA - Single Source of Truth for the entire system
 // ============================================================
 
@@ -348,3 +348,139 @@ export const MOCK_EMPLOYEES: Employee[] = [
     skills: {},
   },
 ];
+
+const MOCK_DEPARTMENTS = [
+  {
+    name: 'QC Section' as DepartmentLabel,
+    prefix: 'QCW',
+    wis: ['QCW001-001', 'QCW001-002', 'QCW002-001'],
+    chiefId: 'EMP002',
+    chiefName: 'นางสาวอรุณี รักดี',
+    managerId: 'EMP003',
+    managerName: 'นายกฤต พร้อมใจ',
+  },
+  {
+    name: 'Production Section' as DepartmentLabel,
+    prefix: 'PROD',
+    wis: ['PROD-010-01', 'PROD-010-02'],
+    chiefId: 'EMP006',
+    chiefName: 'นายพิเชษฐ์ ผลิตเก่ง',
+    managerId: '',
+    managerName: '',
+  },
+  {
+    name: 'Engineering Section' as DepartmentLabel,
+    prefix: 'ENG',
+    wis: ['ENG-M-001', 'ENG-M-002'],
+    chiefId: 'EMP004',
+    chiefName: 'นายวิชัย เก่งดี',
+    managerId: 'EMP003',
+    managerName: 'นายกฤต พร้อมใจ',
+  },
+  {
+    name: 'Maintenance Section' as DepartmentLabel,
+    prefix: 'MNT',
+    wis: ['MNT001-001'],
+    chiefId: 'EMP008',
+    chiefName: 'Chief วิศวะ ซ่อมสร้าง',
+    managerId: '',
+    managerName: '',
+  },
+];
+
+const FIRST_NAMES = [
+  'ธนกร', 'ณัฐพล', 'กิตติ', 'พงศกร', 'วรพล',
+  'ภัทรพล', 'สิรภพ', 'ปกรณ์', 'ธีรภัทร', 'อนุชา',
+  'สมศักดิ์', 'วิทยา', 'สุชาติ', 'เอกชัย', 'ชัยวัฒน์',
+  'อรทัย', 'กนกวรรณ', 'สุภาวดี', 'ปวีณา', 'ศิริพร',
+  'พรทิพย์', 'นภัสสร', 'ชลธิชา', 'พิมพ์ชนก', 'วราภรณ์',
+];
+
+const LAST_NAMES = [
+  'ใจมั่น', 'แสงทอง', 'รุ่งเรือง', 'มีสุข', 'ตั้งใจ',
+  'พัฒนกิจ', 'บุญช่วย', 'วงศ์ดี', 'ศรีสมบัติ', 'มั่นคง',
+  'เจริญผล', 'สุขสำราญ', 'ประเสริฐ', 'ทองดี', 'เกียรติไพศาล',
+  'วัฒนา', 'รักษาดี', 'ศรีสวัสดิ์', 'เพิ่มพูน', 'โชคดี',
+];
+
+const EMPLOYEE_POSITIONS: Record<string, string> = {
+  'QC Section': 'Quality Inspector',
+  'Production Section': 'Production Operator',
+  'Engineering Section': 'Maintenance Engineer',
+  'Maintenance Section': 'Maintenance Technician',
+};
+
+// สร้างพนักงานเพิ่มจากข้อมูลเดิมจนมีทั้งหมด 300 คน
+const GENERATED_EMPLOYEES: Employee[] = Array.from(
+  { length: Math.max(0, 300 - MOCK_EMPLOYEES.length) },
+  (_, index) => {
+    const employeeNumber = index + 1;
+    const id = `EMP${String(employeeNumber + 8).padStart(3, '0')}`;
+
+    const department =
+      MOCK_DEPARTMENTS[index % MOCK_DEPARTMENTS.length];
+
+    const isChief = employeeNumber % 15 === 0;
+    const role: Employee['role'] = isChief ? 'Chief' : 'Staff';
+
+    const firstName =
+      FIRST_NAMES[index % FIRST_NAMES.length];
+
+    const lastName =
+      LAST_NAMES[
+        Math.floor(index / FIRST_NAMES.length) %
+        LAST_NAMES.length
+      ];
+
+    const isFemale =
+      FIRST_NAMES.indexOf(firstName) >= 15;
+
+    const name = `${isFemale ? 'นางสาว' : 'นาย'}${firstName} ${lastName}`;
+
+    const supervisorId = isChief
+      ? department.managerId
+      : department.chiefId;
+
+    const supervisorName = isChief
+      ? department.managerId
+        ? `${department.managerName} (Manager)`
+        : '- (Top Manager)'
+      : `${department.chiefName} (Chief)`;
+
+    const assignedWIs = department.wis.slice(
+      0,
+      1 + (index % department.wis.length),
+    );
+
+    const skills: Record<string, number> = {};
+
+    assignedWIs.forEach((wi, wiIndex) => {
+      ['A', 'B', 'C', 'D'].forEach((skill, skillIndex) => {
+        // สร้างระดับทักษะตัวอย่าง 1–3
+        if ((index + wiIndex + skillIndex) % 3 !== 0) {
+          skills[`${wi}_${skill}`] =
+            ((index + wiIndex + skillIndex) % 3) + 1;
+        }
+      });
+    });
+
+    return {
+      id,
+      name,
+      department: department.name,
+      position: isChief
+        ? `${department.name.replace(' Section', '')} Supervisor (Chief)`
+        : EMPLOYEE_POSITIONS[department.name],
+      role,
+      status: 'Active',
+      supervisorId,
+      supervisorName,
+      initialSkillsSet: true,
+      assignedWIs,
+      skills,
+    };
+  },
+);
+
+// รวมข้อมูลเดิมกับข้อมูลที่สร้างเพิ่ม
+MOCK_EMPLOYEES.push(...GENERATED_EMPLOYEES);

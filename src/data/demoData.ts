@@ -4,7 +4,7 @@ import { bangkokDate } from './trainingCore';
 import type { TrainingRequest, TrainingStatus } from './trainingCore';
 import { populateTeamDemo } from './teamScope';
 
-export const DEMO_REVISION = 2;
+export const DEMO_REVISION = 3;
 export type DemoSkillState = SkillState & { demoRevision?: number; teamDemoRevision?: number };
 
 function teamExamples() {
@@ -20,6 +20,14 @@ export function populateSkillDemo(saved: DemoSkillState = initialState(), now = 
   if ((saved.demoRevision ?? 0) >= DEMO_REVISION) return populateTeamDemo(saved, teamExamples());
   const year = bangkokYear(now);
   const baseline = initialState().snapshots[0].employees;
+  const currentSnapshot = saved.snapshots.find(s => s.year === year);
+  if (currentSnapshot) {
+    const existingIds = new Set(currentSnapshot.employees.map(e => e.id));
+    const toAdd = baseline.filter(e => !existingIds.has(e.id));
+    if (toAdd.length > 0) {
+      currentSnapshot.employees.push(...toAdd.map(e => structuredClone(e)));
+    }
+  }
   const historical = [year - 3, year - 2, year - 1].filter(y => !saved.snapshots.some(s => s.year === y)).map(y => ({
     year: y,
     employees: baseline.map((employee, person) => ({ ...structuredClone(employee), scores: Object.fromEntries(Object.entries(employee.scores).map(([key, score], index) => [key, Math.max(0, score - Math.max(0, year - y - 1) - ((index + person) % 4 === 0 ? 1 : 0))])) })),
