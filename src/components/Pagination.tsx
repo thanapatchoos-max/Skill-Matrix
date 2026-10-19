@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
 export interface PaginationProps {
@@ -12,6 +12,7 @@ export interface PaginationProps {
   pageSizeOptions?: number[];
   itemLabel?: string;
   className?: string;
+  autoScrollTop?: boolean;
 }
 
 export function Pagination({
@@ -25,19 +26,40 @@ export function Pagination({
   pageSizeOptions = [5, 10, 25, 50],
   itemLabel = 'คน',
   className = '',
+  autoScrollTop = true,
 }: PaginationProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [jumpPage, setJumpPage] = useState('');
   const effectivePageSize = pageSize ?? itemsPerPage ?? 10;
   const calculatedTotalPages = Math.max(1, Math.ceil(totalItems / effectivePageSize));
   const totalPages = propTotalPages ?? calculatedTotalPages;
   const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
 
+  const handlePageChange = (newPage: number) => {
+    onPageChange(newPage);
+    if (autoScrollTop && typeof window !== 'undefined' && containerRef.current) {
+      const target =
+        containerRef.current.closest('.overflow-x-auto') ||
+        containerRef.current.previousElementSibling ||
+        containerRef.current.parentElement;
+
+      if (target && typeof target.scrollIntoView === 'function') {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (target instanceof HTMLElement) {
+          target.scrollLeft = 0;
+        }
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  };
+
   const handleJump = (e: React.FormEvent) => {
     e.preventDefault();
     const pageNum = parseInt(jumpPage, 10);
     if (!isNaN(pageNum)) {
       const clamped = Math.max(1, Math.min(pageNum, totalPages));
-      onPageChange(clamped);
+      handlePageChange(clamped);
       setJumpPage('');
     }
   };
@@ -72,6 +94,7 @@ export function Pagination({
 
   return (
     <div
+      ref={containerRef}
       className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 py-3 border-t border-slate-200 bg-white rounded-b-xl ${className}`}
     >
       {/* Left: Summary text & Page Size */}
@@ -89,7 +112,7 @@ export function Pagination({
               onChange={(e) => {
                 const nextSize = Number(e.target.value);
                 onPageSizeChange(nextSize);
-                onPageChange(1);
+                handlePageChange(1);
               }}
               className="rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
@@ -113,7 +136,7 @@ export function Pagination({
             aria-label="หน้าแรกสุด"
             title="หน้าแรกสุด"
             disabled={safeCurrentPage <= 1}
-            onClick={() => onPageChange(1)}
+            onClick={() => handlePageChange(1)}
             className={navBtn}
           >
             <ChevronsLeft size={16} />
@@ -126,7 +149,7 @@ export function Pagination({
             aria-label="ก่อนหน้า"
             title="ก่อนหน้า"
             disabled={safeCurrentPage <= 1}
-            onClick={() => onPageChange(Math.max(1, safeCurrentPage - 1))}
+            onClick={() => handlePageChange(Math.max(1, safeCurrentPage - 1))}
             className={navBtn}
           >
             <ChevronLeft size={16} />
@@ -142,7 +165,7 @@ export function Pagination({
                   type="button"
                   aria-label={`หน้า ${p}`}
                   aria-current={safeCurrentPage === p ? 'page' : undefined}
-                  onClick={() => onPageChange(p)}
+                  onClick={() => handlePageChange(p)}
                   className={pageBtn(safeCurrentPage === p)}
                 >
                   {p}
@@ -161,7 +184,7 @@ export function Pagination({
             aria-label="ถัดไป"
             title="ถัดไป"
             disabled={safeCurrentPage >= totalPages}
-            onClick={() => onPageChange(Math.min(totalPages, safeCurrentPage + 1))}
+            onClick={() => handlePageChange(Math.min(totalPages, safeCurrentPage + 1))}
             className={navBtn}
           >
             <span className="hidden md:inline mr-1">ถัดไป</span>
@@ -174,7 +197,7 @@ export function Pagination({
             aria-label="หน้าหลังสุด"
             title="หน้าหลังสุด"
             disabled={safeCurrentPage >= totalPages}
-            onClick={() => onPageChange(totalPages)}
+            onClick={() => handlePageChange(totalPages)}
             className={navBtn}
           >
             <span className="hidden md:inline mr-1">หน้าหลังสุด</span>
