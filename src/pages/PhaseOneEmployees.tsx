@@ -1,6 +1,6 @@
 import { FilterBar } from '../components/FilterBar';
 import { useState, useRef } from 'react';
-import { Users, Plus, X, Upload, Trash2, ArrowRightLeft, History, Calendar, Check, Building2, ShieldCheck, Pencil } from 'lucide-react';
+import { Users, Plus, X, Upload, Trash2, ArrowRightLeft, History, Calendar, Check, Building2, ShieldCheck, Pencil, FileSpreadsheet } from 'lucide-react';
 import { bangkokYear, employeesForYear, SKILL_DEPARTMENTS, SKILL_WIS, sumSkills, visibleEmployees } from '../data/phase1Core';
 import type { Employee } from '../data/phase1Core';
 import { saveSkillEmployee, transferSkillDepartment, useSkillState } from '../data/phase1Store';
@@ -8,6 +8,7 @@ import { buttonClass, Field, inputClass, LevelBadge, panelClass } from '../compo
 import { Pagination } from '../components/Pagination';
 import { Avatar, compressImage } from '../components/Avatar';
 import { bangkokDate } from '../data/trainingCore';
+import { ExcelImportModal } from '../components/ExcelImportModal';
 
 const blank = {
   id: '',
@@ -39,6 +40,9 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
 
   // Skill History Modal States
   const [historyTarget, setHistoryTarget] = useState<Employee | null>(null);
+
+  // Excel Import Modal State
+  const [showImportModal, setShowImportModal] = useState(false);
 
   const allVisibleEmployees = visibleEmployees(employeesForYear(state, bangkokYear()), userRole);
   const employees = allVisibleEmployees.filter(e =>
@@ -127,16 +131,26 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
           </span>
         </div>
         {userRole === 'admin' && (
-          <button
-            className={buttonClass}
-            onClick={() => {
-              setForm({ ...blank });
-              setEditing(false);
-              setError('');
-            }}
-          >
-            <Plus size={16} />เพิ่มพนักงาน
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-3.5 py-2 text-sm font-semibold text-emerald-800 shadow-2xs hover:bg-emerald-100 transition-colors"
+              onClick={() => setShowImportModal(true)}
+            >
+              <FileSpreadsheet size={16} className="text-emerald-600" />
+              <span>นำเข้าจาก Excel</span>
+            </button>
+            <button
+              className={buttonClass}
+              onClick={() => {
+                setForm({ ...blank });
+                setEditing(false);
+                setError('');
+              }}
+            >
+              <Plus size={16} />เพิ่มพนักงาน
+            </button>
+          </div>
         )}
       </div>
 
@@ -687,6 +701,17 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
           </div>
         </div>
       )}
+
+      {/* Excel / CSV Employee Import Modal */}
+      <ExcelImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={(count) => {
+          setSuccessMessage(`นำเข้าพนักงานจากไฟล์สำเร็จ ${count} คน`);
+          setTimeout(() => setSuccessMessage(''), 4500);
+        }}
+        existingEmployees={allVisibleEmployees}
+      />
     </div>
   );
 }

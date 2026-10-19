@@ -41,6 +41,29 @@ function getColorClass(text?: string): string {
   return colorPalette[index];
 }
 
+/**
+ * Normalizes common cloud storage image links (Google Drive, Dropbox) into direct embeddable image URLs.
+ */
+export function normalizeImageUrl(url?: string | null): string | undefined {
+  if (!url || typeof url !== 'string') return undefined;
+  const trimmed = url.trim();
+  if (!trimmed) return undefined;
+
+  // Google Drive conversion:
+  // e.g. https://drive.google.com/file/d/1ABC123/view?usp=sharing -> https://lh3.googleusercontent.com/d/1ABC123
+  const gDriveMatch = trimmed.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)([a-zA-Z0-9_-]+)/);
+  if (gDriveMatch && gDriveMatch[1]) {
+    return `https://lh3.googleusercontent.com/d/${gDriveMatch[1]}`;
+  }
+
+  // Dropbox conversion: dl=0 -> raw=1
+  if (trimmed.includes('dropbox.com')) {
+    return trimmed.replace(/[?&]dl=0/, '?raw=1');
+  }
+
+  return trimmed;
+}
+
 export function Avatar({
   src,
   name,
@@ -49,13 +72,30 @@ export function Avatar({
   alt,
 }: AvatarProps) {
   const [hasError, setHasError] = useState(false);
+  const [useFallback, setUseFallback] = useState(false);
   const currentSize = sizeClasses[size] || sizeClasses.md;
+  const normalizedSrc = normalizeImageUrl(src);
 
   useEffect(() => {
     setHasError(false);
+    setUseFallback(false);
   }, [src]);
 
-  const showImage = Boolean(src && !hasError && src.trim() !== '');
+  // If normalized Google Drive image fails, try thumbnail endpoint
+  const activeSrc =
+    useFallback && normalizedSrc?.includes('googleusercontent.com/d/')
+      ? normalizedSrc.replace('https://lh3.googleusercontent.com/d/', 'https://drive.google.com/thumbnail?id=') + '&sz=w256'
+      : normalizedSrc;
+
+  const showImage = Boolean(activeSrc && !hasError);
+
+  function handleError() {
+    if (!useFallback && normalizedSrc?.includes('googleusercontent.com/d/')) {
+      setUseFallback(true);
+    } else {
+      setHasError(true);
+    }
+  }
 
   return (
     <div
@@ -64,11 +104,12 @@ export function Avatar({
     >
       {showImage ? (
         <img
-          src={src!}
+          src={activeSrc!}
           alt={alt || name || 'รูปพนักงาน'}
-          onError={() => setHasError(true)}
+          onError={handleError}
           className="h-full w-full object-cover rounded-full"
           loading="lazy"
+          referrerPolicy="no-referrer"
         />
       ) : (
         <span className="flex items-center justify-center font-bold">

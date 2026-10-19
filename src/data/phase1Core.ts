@@ -111,6 +111,54 @@ export function transferEmployeeDepartment(
     ],
   };
 }
+
+export function importEmployeesBatch(
+  state: SkillState,
+  role: Role,
+  newEmployees: Array<{ id: string; name: string; position: string; department: string; avatarUrl?: string }>,
+  now = new Date()
+): SkillState {
+  if (role !== 'admin') throw new Error('เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถนำเข้าข้อมูลพนักงานได้');
+  const year = bangkokYear(now);
+  const existing = employeesForYear(state, year);
+  const existingIds = new Set(existing.map(e => e.id));
+
+  const validEntries: Employee[] = [];
+  for (const item of newEmployees) {
+    const trimmedId = item.id.trim();
+    if (!trimmedId || existingIds.has(trimmedId)) continue;
+    existingIds.add(trimmedId);
+
+    const validDeptSkills = SKILL_WIS.filter(w => w.department === item.department).flatMap(w => w.types.map(t => `${w.code}_${t.code}`));
+    const initialAssigned = validDeptSkills.slice(0, 4);
+    const initialScores: Record<string, number> = {};
+    validDeptSkills.forEach(k => { initialScores[k] = 0; });
+    const team = DEMO_TEAMS.find(t => t.department === item.department && t.id !== 'QC-MGMT');
+
+    validEntries.push({
+      id: trimmedId,
+      name: item.name.trim(),
+      position: item.position.trim(),
+      department: item.department.trim(),
+      role: 'Staff',
+      teamId: team?.id,
+      supervisorId: team?.supervisorId,
+      scores: initialScores,
+      assignedSkills: initialAssigned,
+      avatarUrl: item.avatarUrl ? item.avatarUrl.trim() : undefined,
+      transferHistory: [],
+    });
+  }
+
+  const nextEmployees = [...existing, ...validEntries];
+  return {
+    ...state,
+    snapshots: [
+      ...state.snapshots.filter(s => s.year !== year),
+      { year, employees: nextEmployees },
+    ],
+  };
+}
 export interface SkillChange { key: string; before: number; after: SkillLevel }
 export interface Adjustment {
   id: string; employeeId: string; year: number; changes: SkillChange[];
