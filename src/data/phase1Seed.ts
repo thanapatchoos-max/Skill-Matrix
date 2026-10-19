@@ -237,6 +237,29 @@ const SEED: Employee[] = [
       "PROD-020-01_E",
       "PROD-030-01_B",
       "PROD-030-01_E"
+    ],
+    "transferHistory": [
+      {
+        "id": "TRF-DEMO-001",
+        "employeeId": "EMP008",
+        "fromDepartment": "QC Section",
+        "toDepartment": "Production",
+        "effectiveDate": "2025-10-01",
+        "transferredAt": "2025-09-20T08:30:00.000Z",
+        "reason": "โอนย้ายเพื่อสนับสนุนสายการผลิตใหม่และถ่ายทอดมาตรฐานคุณภาพ",
+        "scoresSnapshot": {
+          "QCW001-001_A": 2,
+          "QCW001-001_B": 2,
+          "QCW001-001_C": 1,
+          "QCW002-001_C": 2
+        },
+        "assignedSkillsSnapshot": [
+          "QCW001-001_A",
+          "QCW001-001_B",
+          "QCW001-001_C",
+          "QCW002-001_C"
+        ]
+      }
     ]
   },
   {

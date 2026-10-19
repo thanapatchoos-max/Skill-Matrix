@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { initialState, proposeAdjustment, reviewAdjustment, saveEmployeeProfile } from './phase1Core';
+import { initialState, proposeAdjustment, reviewAdjustment, saveEmployeeProfile, transferEmployeeDepartment } from './phase1Core';
 import type { Employee, Role, SkillState } from './phase1Core';
 import { populateSkillDemo } from './demoData';
 
@@ -59,6 +59,12 @@ export function saveSkillEmployee(role: Role, profile: Pick<Employee, 'id' | 'na
   const latest=readState();
   if (storageError) throw new Error(storageError);
   persist(saveEmployeeProfile(latest,role,profile));
+}
+export function transferSkillDepartment(role: Role, employeeId: string, newDepartment: string, effectiveDate: string, reason?: string) {
+  if (storageError) throw new Error(storageError);
+  const latest=readState();
+  if (storageError) throw new Error(storageError);
+  persist(transferEmployeeDepartment(latest, role, employeeId, newDepartment, effectiveDate, reason));
 }
 export function resetSkillDemoState() {
   localStorage.removeItem(KEY);

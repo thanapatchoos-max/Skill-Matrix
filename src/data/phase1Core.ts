@@ -1,14 +1,28 @@
 import { MASTER_WIS } from './masterData';
 import { INITIAL_EMPLOYEES } from './phase1Seed';
-import { demoMembership, isChiefReport } from './teamScope';
+import { DEMO_TEAMS, demoMembership, isChiefReport } from './teamScope';
 
 export type SkillLevel = 0 | 1 | 2 | 3;
 export type Role = 'admin' | 'chief' | 'manager' | 'staff';
+
+export interface DepartmentTransferRecord {
+  id: string;
+  employeeId: string;
+  fromDepartment: string;
+  toDepartment: string;
+  effectiveDate: string;
+  transferredAt: string;
+  reason: string;
+  scoresSnapshot: Record<string, number>;
+  assignedSkillsSnapshot: string[];
+}
+
 export interface Employee {
   id: string; name: string; role: string; position: string; department: string;
   scores: Record<string, number>; assignedSkills: string[];
   teamId?: string; supervisorId?: string;
   avatarUrl?: string;
+  transferHistory?: DepartmentTransferRecord[];
 }
 
 export function saveEmployeeProfile(state: SkillState, role: Role, profile: Pick<Employee, 'id' | 'name' | 'position' | 'department'> & { assignedSkills: string[]; avatarUrl?: string }, now = new Date()): SkillState {
@@ -22,9 +36,80 @@ export function saveEmployeeProfile(state: SkillState, role: Role, profile: Pick
     throw new Error('กรุณาพิจารณาคำขอปรับคะแนนที่ค้างอยู่ก่อนย้ายแผนก');
   const validKeys=SKILL_WIS.filter(w => w.department === profile.department).flatMap(w => w.types.map(t => `${w.code}_${t.code}`));
   if (profile.assignedSkills.some(key => !validKeys.includes(key))) throw new Error('สกิลที่มอบหมายต้องอยู่ในแผนกของพนักงาน');
-  const updated: Employee = { ...employee, ...profile, name: profile.name.trim(), position: profile.position.trim(), role: employee?.role ?? 'Staff', scores: employee?.scores ?? {}, avatarUrl: profile.avatarUrl !== undefined ? profile.avatarUrl : employee?.avatarUrl };
+  const updated: Employee = {
+    ...employee,
+    ...profile,
+    name: profile.name.trim(),
+    position: profile.position.trim(),
+    role: employee?.role ?? 'Staff',
+    scores: employee?.scores ?? {},
+    avatarUrl: profile.avatarUrl !== undefined ? profile.avatarUrl : employee?.avatarUrl,
+    transferHistory: employee?.transferHistory ?? [],
+  };
   const nextEmployees=employee ? employees.map(e => e.id === profile.id ? updated : e) : [...employees,updated];
   return {...state,snapshots:[...state.snapshots.filter(s => s.year !== year),{year,employees:nextEmployees}]};
+}
+
+export function transferEmployeeDepartment(
+  state: SkillState,
+  role: Role,
+  employeeId: string,
+  newDepartment: string,
+  effectiveDate: string,
+  reason = '',
+  now = new Date()
+): SkillState {
+  if (role !== 'admin') throw new Error('เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถโอนย้ายแผนกได้');
+  if (!SKILL_DEPARTMENTS.includes(newDepartment)) throw new Error('กรุณาเลือกแผนกปลายทางที่ถูกต้อง');
+
+  const year = bangkokYear(now);
+  const employees = employeesForYear(state, year);
+  const employee = employees.find(e => e.id === employeeId);
+  if (!employee) throw new Error('ไม่พบข้อมูลพนักงานที่ต้องการโอนย้าย');
+  if (employee.department === newDepartment) throw new Error('พนักงานสังกัดแผนกนี้อยู่แล้ว กรุณาเลือกแผนกอื่น');
+
+  if (state.adjustments.some(a => a.employeeId === employeeId && a.status === 'pending')) {
+    throw new Error('กรุณาพิจารณาคำขอปรับคะแนนที่ค้างอยู่ของพนักงานก่อนดำเนินการโอนย้ายแผนก');
+  }
+
+  const transferRecord: DepartmentTransferRecord = {
+    id: `TRF-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    employeeId,
+    fromDepartment: employee.department,
+    toDepartment: newDepartment,
+    effectiveDate: effectiveDate || now.toISOString().slice(0, 10),
+    transferredAt: now.toISOString(),
+    reason: reason.trim() || 'โอนย้ายตามโครงสร้างองค์กร',
+    scoresSnapshot: { ...employee.scores },
+    assignedSkillsSnapshot: [...employee.assignedSkills],
+  };
+
+  const newDeptSkills = SKILL_WIS.filter(w => w.department === newDepartment).flatMap(w => w.types.map(t => `${w.code}_${t.code}`));
+  const newTeam = DEMO_TEAMS.find(t => t.department === newDepartment && t.id !== 'QC-MGMT');
+
+  const newScores: Record<string, number> = {};
+  newDeptSkills.forEach(key => {
+    newScores[key] = employee.scores[key] ?? 0;
+  });
+
+  const updated: Employee = {
+    ...employee,
+    department: newDepartment,
+    teamId: newTeam?.id,
+    supervisorId: newTeam?.supervisorId,
+    scores: newScores,
+    assignedSkills: newDeptSkills.slice(0, 4),
+    transferHistory: [...(employee.transferHistory ?? []), transferRecord],
+  };
+
+  const nextEmployees = employees.map(e => e.id === employeeId ? updated : e);
+  return {
+    ...state,
+    snapshots: [
+      ...state.snapshots.filter(s => s.year !== year),
+      { year, employees: nextEmployees },
+    ],
+  };
 }
 export interface SkillChange { key: string; before: number; after: SkillLevel }
 export interface Adjustment {

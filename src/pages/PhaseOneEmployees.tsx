@@ -1,11 +1,13 @@
 import { FilterBar } from '../components/FilterBar';
 import { useState, useRef } from 'react';
-import { Users, Plus, X, Upload, Trash2 } from 'lucide-react';
+import { Users, Plus, X, Upload, Trash2, ArrowRightLeft, History, Calendar, Check, Building2, ShieldCheck, Pencil } from 'lucide-react';
 import { bangkokYear, employeesForYear, SKILL_DEPARTMENTS, SKILL_WIS, sumSkills, visibleEmployees } from '../data/phase1Core';
-import { saveSkillEmployee, useSkillState } from '../data/phase1Store';
-import { buttonClass, Field, inputClass, panelClass } from '../components/Phase1Shared';
+import type { Employee } from '../data/phase1Core';
+import { saveSkillEmployee, transferSkillDepartment, useSkillState } from '../data/phase1Store';
+import { buttonClass, Field, inputClass, LevelBadge, panelClass } from '../components/Phase1Shared';
 import { Pagination } from '../components/Pagination';
 import { Avatar, compressImage } from '../components/Avatar';
+import { bangkokDate } from '../data/trainingCore';
 
 const blank = {
   id: '',
@@ -26,6 +28,17 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Transfer Department States
+  const [transferTarget, setTransferTarget] = useState<Employee | null>(null);
+  const [targetDept, setTargetDept] = useState('');
+  const [effectiveDate, setEffectiveDate] = useState(bangkokDate());
+  const [transferReason, setTransferReason] = useState('');
+  const [transferError, setTransferError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  // Skill History Modal States
+  const [historyTarget, setHistoryTarget] = useState<Employee | null>(null);
 
   const allVisibleEmployees = visibleEmployees(employeesForYear(state, bangkokYear()), userRole);
   const employees = allVisibleEmployees.filter(e =>
@@ -68,9 +81,38 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
       saveSkillEmployee('admin', form!);
       setForm(null);
       setError('');
+      setSuccessMessage(editing ? `แก้ไขข้อมูล ${form!.name} สำเร็จ` : `เพิ่มพนักงาน ${form!.name} สำเร็จ`);
+      setTimeout(() => setSuccessMessage(''), 3500);
     } catch (e) {
       setError((e as Error).message);
     }
+  }
+
+  function openTransfer(emp: Employee) {
+    setTransferTarget(emp);
+    const available = SKILL_DEPARTMENTS.filter(d => d !== emp.department);
+    setTargetDept(available[0] ?? '');
+    setEffectiveDate(bangkokDate());
+    setTransferReason('');
+    setTransferError('');
+  }
+
+  function handleTransferSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!transferTarget) return;
+    setTransferError('');
+    try {
+      transferSkillDepartment('admin', transferTarget.id, targetDept, effectiveDate, transferReason);
+      setSuccessMessage(`โอนย้าย ${transferTarget.name} ไปยังแผนก ${targetDept} สำเร็จ (จัดเก็บประวัติสกิลเดิมเรียบร้อย)`);
+      setTransferTarget(null);
+      setTimeout(() => setSuccessMessage(''), 4000);
+    } catch (err) {
+      setTransferError((err as Error).message || 'เกิดข้อผิดพลาดในการโอนย้าย');
+    }
+  }
+
+  function openHistory(emp: Employee) {
+    setHistoryTarget(emp);
   }
 
   return (
@@ -99,8 +141,15 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
       </div>
 
       <p className="text-sm text-slate-500">
-        คะแนนพนักงานปรับผ่านหัวหน้างานและการอนุมัติ · พนักงานใหม่เริ่มที่ Level 0
+        จัดการข้อมูลส่วนตัว โอนย้ายแผนก และตรวจประวัติสกิลเดิม · คะแนนพนักงานปรับผ่านหัวหน้างานและการอนุมัติ
       </p>
+
+      {successMessage && (
+        <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800 flex items-center gap-2 shadow-xs">
+          <Check size={18} className="text-emerald-600" />
+          <span>{successMessage}</span>
+        </div>
+      )}
 
       <FilterBar title="ค้นหาพนักงาน" onReset={() => { setSearch(''); setCurrentPage(1); }}>
         <Field label="ค้นหาพนักงาน">
@@ -122,7 +171,7 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
               <th className="p-4">ตำแหน่ง</th>
               <th className="p-4">แผนก</th>
               <th className="p-4 text-right">คะแนนรวม</th>
-              <th className="p-4"></th>
+              <th className="p-4 text-right">การจัดการ</th>
             </tr>
           </thead>
           <tbody>
@@ -136,28 +185,54 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
                       <span>{e.name}</span>
                     </div>
                   </td>
-                  <td className="p-4">{e.position}</td>
-                  <td className="p-4">{e.department}</td>
-                  <td className="p-4 text-right font-bold text-blue-800">{sumSkills(e)}</td>
+                  <td className="p-4 text-slate-700">{e.position}</td>
                   <td className="p-4">
+                    <div className="font-semibold text-slate-800">{e.department}</div>
+                    {e.transferHistory && e.transferHistory.length > 0 && (
+                      <div className="mt-0.5 inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700">
+                        <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                        เคยโอนย้าย {e.transferHistory.length} ครั้ง
+                      </div>
+                    )}
+                  </td>
+                  <td className="p-4 text-right font-bold text-blue-800">{sumSkills(e)}</td>
+                  <td className="p-4 text-right">
                     {userRole === 'admin' && (
-                      <button
-                        className="text-blue-700 hover:underline font-medium"
-                        onClick={() => {
-                          setForm({
-                            id: e.id,
-                            name: e.name,
-                            position: e.position,
-                            department: e.department,
-                            assignedSkills: [...e.assignedSkills],
-                            avatarUrl: e.avatarUrl ?? '',
-                          });
-                          setEditing(true);
-                          setError('');
-                        }}
-                      >
-                        แก้ไขข้อมูล
-                      </button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          type="button"
+                          title="แก้ไขข้อมูลทั่วไป"
+                          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 hover:border-slate-300 transition-colors"
+                          onClick={() => {
+                            setForm({
+                              id: e.id,
+                              name: e.name,
+                              position: e.position,
+                              department: e.department,
+                              assignedSkills: [...e.assignedSkills],
+                              avatarUrl: e.avatarUrl ?? '',
+                            });
+                            setEditing(true);
+                            setError('');
+                          }}
+                        >
+                          <Pencil size={13} />
+                          <span>แก้ไข</span>
+                        </button>
+                        <button
+                          type="button"
+                          title="ดูประวัติการโอนย้ายและสกิลของแผนกเดิม"
+                          className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs font-semibold shadow-2xs transition-colors ${
+                            e.transferHistory?.length
+                              ? 'border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100'
+                              : 'border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-100'
+                          }`}
+                          onClick={() => openHistory(e)}
+                        >
+                          <History size={13} />
+                          <span>ประวัติ {e.transferHistory?.length ? `(${e.transferHistory.length})` : ''}</span>
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>
@@ -268,17 +343,42 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
                   placeholder="เช่น ช่างเทคนิคชำนาญการ"
                 />
               </Field>
-              <Field label="แผนก">
-                <select
-                  className={inputClass}
-                  value={form.department}
-                  onChange={e => setForm({ ...form, department: e.target.value, assignedSkills: [] })}
-                >
-                  {SKILL_DEPARTMENTS.map(d => (
-                    <option key={d}>{d}</option>
-                  ))}
-                </select>
-              </Field>
+              {editing ? (
+                <Field label="แผนก">
+                  <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-100/80 px-3 py-2 text-sm text-slate-700">
+                    <div className="flex items-center gap-2">
+                      <Building2 size={16} className="text-slate-400" />
+                      <span className="font-semibold text-slate-800">{form.department}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const emp = employees.find(e => e.id === form.id);
+                        if (emp) {
+                          setForm(null);
+                          openTransfer(emp);
+                        }
+                      }}
+                      className="inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-white px-2.5 py-1 text-xs font-semibold text-blue-700 shadow-2xs hover:bg-blue-50 transition-colors"
+                    >
+                      <ArrowRightLeft size={12} />
+                      <span>โอนย้ายแผนก</span>
+                    </button>
+                  </div>
+                </Field>
+              ) : (
+                <Field label="แผนก">
+                  <select
+                    className={inputClass}
+                    value={form.department}
+                    onChange={e => setForm({ ...form, department: e.target.value, assignedSkills: [] })}
+                  >
+                    {SKILL_DEPARTMENTS.map(d => (
+                      <option key={d}>{d}</option>
+                    ))}
+                  </select>
+                </Field>
+              )}
             </div>
 
             <div className="space-y-2 pt-2 border-t border-slate-100">
@@ -324,6 +424,267 @@ export default function PhaseOneEmployees({ userRole }: { userRole: string }) {
               <button className={buttonClass}>บันทึกข้อมูลพนักงาน</button>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* MODAL 1: โอนย้ายแผนก (Transfer Department) */}
+      {transferTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-2xs">
+          <form onSubmit={handleTransferSubmit} className={`${panelClass} w-full max-w-lg space-y-5 p-6 animate-in fade-in zoom-in-95 duration-150`}>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2 text-slate-800 font-bold text-lg">
+                <ArrowRightLeft className="text-blue-600" size={20} />
+                <h2>โอนย้ายแผนกพนักงาน</h2>
+              </div>
+              <button type="button" onClick={() => setTransferTarget(null)} className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+
+            {transferError && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700 border border-red-200">{transferError}</p>}
+
+            {/* Employee Preview */}
+            <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3.5">
+              <Avatar src={transferTarget.avatarUrl} name={transferTarget.name} size="md" />
+              <div>
+                <div className="font-bold text-slate-800">{transferTarget.name}</div>
+                <div className="text-xs text-slate-500">{transferTarget.id} · {transferTarget.position}</div>
+              </div>
+            </div>
+
+            {/* Transfer Route */}
+            <div className="grid gap-3 sm:grid-cols-[1fr_auto_1fr] items-center">
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">แผนกเดิม (ดึงอัตโนมัติ)</label>
+                <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700">
+                  <Building2 size={16} className="text-slate-400 shrink-0" />
+                  <span className="truncate">{transferTarget.department}</span>
+                </div>
+              </div>
+              <div className="flex justify-center text-blue-600 pt-4">
+                <ArrowRightLeft size={18} />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">แผนกใหม่ที่ย้ายไป *</label>
+                <select
+                  required
+                  className={inputClass}
+                  value={targetDept}
+                  onChange={e => setTargetDept(e.target.value)}
+                >
+                  {SKILL_DEPARTMENTS.filter(d => d !== transferTarget.department).map(d => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <Field label="วันที่มีผลบังคับใช้ *">
+              <input
+                required
+                type="date"
+                className={inputClass}
+                value={effectiveDate}
+                onChange={e => setEffectiveDate(e.target.value)}
+              />
+            </Field>
+
+            <Field label="เหตุผลการโอนย้าย / หมายเหตุ">
+              <textarea
+                rows={3}
+                maxLength={1000}
+                className={inputClass}
+                value={transferReason}
+                onChange={e => setTransferReason(e.target.value)}
+                placeholder="ระบุเหตุผล เช่น โอนย้ายเพื่อเสริมกำลังผลิตตามคำสั่ง บก.04/2026, ขอย้ายสายงานตามความเชี่ยวชาญ..."
+              />
+            </Field>
+
+            {/* Policy Banner */}
+            <div className="rounded-xl border border-blue-200 bg-blue-50/70 p-3.5 text-xs leading-5 text-blue-900">
+              <div className="font-bold flex items-center gap-1.5 mb-1">
+                <ShieldCheck size={15} />
+                การจัดการและบันทึกประวัติสกิลเดิม
+              </div>
+              <p>
+                ระบบจะบันทึกคะแนนและสกิลทั้งหมดของแผนก <strong>{transferTarget.department}</strong> เก็บไว้ใน <strong>"ประวัติสกิลของแผนกเดิม"</strong> โดยอัตโนมัติ เพื่อให้ตรวจสอบย้อนหลังได้ตลอดเวลา และในแผนกใหม่ <strong>{targetDept}</strong> พนักงานจะเริ่มต้นด้วยชุดทักษะของแผนกใหม่
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setTransferTarget(null)}
+                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                ยกเลิก
+              </button>
+              <button type="submit" className={buttonClass}>
+                <Check size={16} />
+                ยืนยันการโอนย้ายแผนก
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* MODAL 2: ประวัติสกิลของแผนกเดิม (Skill & Transfer History Modal) */}
+      {historyTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-2xs">
+          <div className={`${panelClass} max-h-[90vh] w-full max-w-3xl space-y-5 overflow-y-auto p-6 animate-in fade-in zoom-in-95 duration-150`}>
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2 text-slate-800 font-bold text-lg">
+                <History className="text-amber-600" size={20} />
+                <h2>ประวัติการโอนย้ายและสกิลของแผนกเดิม</h2>
+              </div>
+              <button type="button" onClick={() => setHistoryTarget(null)} className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Employee Header */}
+            <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-slate-50/80 p-4">
+              <div className="flex items-center gap-3">
+                <Avatar src={historyTarget.avatarUrl} name={historyTarget.name} size="lg" className="ring-2 ring-white shadow-xs" />
+                <div>
+                  <h3 className="font-bold text-slate-900 text-base">{historyTarget.name}</h3>
+                  <p className="text-xs text-slate-500">{historyTarget.id} · {historyTarget.position}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-xs text-slate-400 block mb-0.5">แผนกปัจจุบัน</span>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-800">
+                  <Building2 size={13} />
+                  {historyTarget.department}
+                </span>
+              </div>
+            </div>
+
+            {/* History Records List */}
+            {!historyTarget.transferHistory || historyTarget.transferHistory.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center text-sm text-slate-500">
+                <History size={32} className="mx-auto text-slate-300 mb-2" />
+                <p className="font-medium text-slate-700">ยังไม่มีประวัติการโอนย้ายแผนก</p>
+                <p className="text-xs text-slate-400 mt-1">พนักงานท่านนี้ยังไม่เคยเปลี่ยนสังกัดแผนก หรือเพิ่งเริ่มงานในแผนกปัจจุบัน</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    ประวัติการโอนย้าย ({historyTarget.transferHistory.length} รายการ)
+                  </span>
+                </div>
+
+                {/* Timeline of transfers */}
+                <div className="space-y-5">
+                  {historyTarget.transferHistory.slice().reverse().map((record, index) => {
+                    const previousSkills = Object.entries(record.scoresSnapshot);
+                    const totalScore = previousSkills.reduce((sum, [, score]) => sum + score, 0);
+
+                    return (
+                      <article key={record.id} className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-xs">
+                        {/* Record Header */}
+                        <div className="bg-slate-50/90 border-b border-slate-200 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+                          <div className="flex items-center gap-2">
+                            <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800">
+                              ครั้งที่ {historyTarget.transferHistory!.length - index}
+                            </span>
+                            <div className="flex items-center gap-1.5 text-sm font-bold text-slate-800">
+                              <span>{record.fromDepartment}</span>
+                              <ArrowRightLeft size={14} className="text-blue-600" />
+                              <span className="text-blue-700">{record.toDepartment}</span>
+                            </div>
+                          </div>
+                          <div className="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
+                            <Calendar size={13} className="text-slate-400" />
+                            วันที่มีผล: <strong className="text-slate-700 font-bold">{record.effectiveDate}</strong>
+                          </div>
+                        </div>
+
+                        <div className="p-4 space-y-4">
+                          {/* Reason / Remarks */}
+                          <div className="text-xs text-slate-600 bg-slate-50 rounded-lg p-2.5">
+                            <strong className="text-slate-700">เหตุผล / บันทึก: </strong>
+                            {record.reason || 'ไม่ได้ระบุ'}
+                          </div>
+
+                          {/* Archived Skills Table */}
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                                <ShieldCheck size={14} className="text-emerald-600" />
+                                ประวัติสกิลแผนกเดิม ({record.fromDepartment})
+                              </span>
+                              <span className="text-xs font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded">
+                                คะแนนรวมเดิม: {totalScore} คะแนน
+                              </span>
+                            </div>
+
+                            {previousSkills.length === 0 ? (
+                              <p className="text-xs text-slate-400 italic">ไม่มีข้อมูลสกิลที่บันทึกไว้ในแผนกเดิม</p>
+                            ) : (
+                              <div className="overflow-x-auto rounded-lg border border-slate-200">
+                                <table className="w-full text-left text-xs">
+                                  <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+                                    <tr>
+                                      <th className="p-2.5">รหัส W/I</th>
+                                      <th className="p-2.5">ชื่องาน</th>
+                                      <th className="p-2.5">ประเภท</th>
+                                      <th className="p-2.5 text-center">ระดับสกิลเดิม</th>
+                                      <th className="p-2.5 text-center">สถานะ On-duty</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-slate-100">
+                                    {previousSkills.map(([key, score]) => {
+                                      const wiCode = key.slice(0, key.lastIndexOf('_'));
+                                      const typeCode = key.slice(key.lastIndexOf('_') + 1);
+                                      const wi = SKILL_WIS.find(w => w.code === wiCode);
+                                      const typeObj = wi?.types.find(t => t.code === typeCode);
+                                      const isOnDuty = record.assignedSkillsSnapshot?.includes(key);
+
+                                      return (
+                                        <tr key={key} className="hover:bg-slate-50/50">
+                                          <td className="p-2.5 font-mono font-semibold text-slate-700">{wiCode}</td>
+                                          <td className="p-2.5 text-slate-600 max-w-[200px] truncate" title={wi?.name}>{wi?.name ?? wiCode}</td>
+                                          <td className="p-2.5 text-slate-600 font-medium">Type {typeCode} {typeObj ? `(${typeObj.label})` : ''}</td>
+                                          <td className="p-2.5 text-center">
+                                            <LevelBadge level={score} />
+                                          </td>
+                                          <td className="p-2.5 text-center">
+                                            {isOnDuty ? (
+                                              <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
+                                                มอบหมาย
+                                              </span>
+                                            ) : (
+                                              <span className="text-[10px] text-slate-400">สำรอง</span>
+                                            )}
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setHistoryTarget(null)}
+                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                ปิดหน้าต่าง
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
