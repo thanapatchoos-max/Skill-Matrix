@@ -27,7 +27,7 @@ export function Pagination({
   className = '',
 }: PaginationProps) {
   const [jumpPage, setJumpPage] = useState('');
-  const effectivePageSize = pageSize ?? itemsPerPage ?? 5;
+  const effectivePageSize = pageSize ?? itemsPerPage ?? 10;
   const calculatedTotalPages = Math.max(1, Math.ceil(totalItems / effectivePageSize));
   const totalPages = propTotalPages ?? calculatedTotalPages;
   const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);

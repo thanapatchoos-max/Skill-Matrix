@@ -14,7 +14,7 @@ export default function PhaseOneEmployees({userRole}:{userRole:string}) {
   const [editing,setEditing]=useState(false);
   const [error,setError]=useState('');
   const [currentPage,setCurrentPage]=useState(1);
-  const [pageSize,setPageSize]=useState(5);
+  const [pageSize,setPageSize]=useState(10);
 
   const allVisibleEmployees=visibleEmployees(employeesForYear(state,bangkokYear()),userRole);
   const employees=allVisibleEmployees.filter(e => `${e.id} ${e.name} ${e.department} ${e.position}`.toLowerCase().includes(search.trim().toLowerCase()));

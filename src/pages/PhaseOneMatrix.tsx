@@ -13,7 +13,7 @@ export default function PhaseOneMatrix({userRole,individual=false,title}:{userRo
   const [wi,setWi]=useState('ALL');const [type,setType]=useState('ALL');const [level,setLevel]=useState('ALL');
   const [search,setSearch]=useState('');const [selectedId,setSelectedId]=useState('EMP001');const [onDuty,setOnDuty]=useState(false);
   const [currentPage,setCurrentPage]=useState(1);
-  const [pageSize,setPageSize]=useState(5);
+  const [pageSize,setPageSize]=useState(10);
 
   const employees=visibleEmployees(employeesForYear(state,bangkokYear()),userRole).filter(employee=>(department==='ALL'||employee.department===department)&&`${employee.id} ${employee.name} ${employee.department} ${employee.position}`.toLowerCase().includes(search.trim().toLowerCase()));
   const selected=employees.find(employee=>employee.id===selectedId)??employees[0];

@@ -69,7 +69,7 @@ export function MasterData({ userRole = 'admin' }: { userRole?: string }) {
   const [showArchived, setShowArchived] = useState(false);
   const [activeTab, setActiveTab] = useState<'wis' | 'skillTypes'>('wis');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
 
   // Inline Form State (No Popup Modal!)
   const [isFormOpen, setIsFormOpen] = useState(false);

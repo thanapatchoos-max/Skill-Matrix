@@ -16,7 +16,7 @@ export default function ChiefIndividualScoresPage() {
   const [proposed,setProposed]=useState<Record<string,number>>({});const [reason,setReason]=useState('');const [evidence,setEvidence]=useState('');
   const [message,setMessage]=useState('');const [error,setError]=useState('');
   const [currentPage,setCurrentPage]=useState(1);
-  const [pageSize,setPageSize]=useState(5);
+  const [pageSize,setPageSize]=useState(10);
 
   const employee=employees.find(person=>person.id===employeeId)??employees[0];
   const rows=employee?individualAssessment(employee).rows:[];

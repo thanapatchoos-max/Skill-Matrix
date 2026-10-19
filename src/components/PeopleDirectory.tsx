@@ -8,7 +8,7 @@ import { Pagination } from './Pagination';
 export default function PeopleDirectory({employees}:{employees:Employee[]}) {
   const [search,setSearch]=useState('');
   const [currentPage,setCurrentPage]=useState(1);
-  const [pageSize,setPageSize]=useState(5);
+  const [pageSize,setPageSize]=useState(10);
 
   const people=employees.filter(e=>`${e.name} ${e.id} ${e.department} ${e.position}`.toLowerCase().includes(search.trim().toLowerCase()));
 
