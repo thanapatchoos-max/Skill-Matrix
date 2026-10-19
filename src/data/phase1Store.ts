@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import { importEmployeesBatch, initialState, proposeAdjustment, reviewAdjustment, saveEmployeeProfile, transferEmployeeDepartment } from './phase1Core';
-import type { Employee, Role, SkillState } from './phase1Core';
+import type { Employee, Role, SkillLevel, SkillState } from './phase1Core';
 import { populateSkillDemo } from './demoData';
 
 const KEY = 'daihen.skill-matrix.phase1.v1';
@@ -48,11 +48,11 @@ export function submitSkillAdjustment(role: Role, employeeId: string, proposed: 
   if (storageError) throw new Error(storageError);
   persist(proposeAdjustment(latest, role, employeeId, proposed, reason, evidence));
 }
-export function decideSkillAdjustment(role: Role, id: string, decision: 'approved' | 'rejected', remark: string) {
+export function decideSkillAdjustment(role: Role, id: string, decision: 'approved' | 'rejected', remark: string, managerScores?: Record<string, SkillLevel>) {
   if (storageError) throw new Error(storageError);
   const latest = readState();
   if (storageError) throw new Error(storageError);
-  persist(reviewAdjustment(latest, role, id, decision, remark));
+  persist(reviewAdjustment(latest, role, id, decision, remark, managerScores));
 }
 export function saveSkillEmployee(role: Role, profile: Pick<Employee, 'id' | 'name' | 'position' | 'department'> & { assignedSkills: string[]; avatarUrl?: string }) {
   if (storageError) throw new Error(storageError);

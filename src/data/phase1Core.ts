@@ -159,7 +159,7 @@ export function importEmployeesBatch(
     ],
   };
 }
-export interface SkillChange { key: string; before: number; after: SkillLevel }
+export interface SkillChange { key: string; before: number; after: SkillLevel; proposedAfter?: SkillLevel; }
 export interface Adjustment {
   id: string; employeeId: string; year: number; changes: SkillChange[];
   reason: string; evidence: string; submittedBy: string; submittedName: string; submittedAt: string;
@@ -245,21 +245,58 @@ export function proposeAdjustment(state: SkillState, role: Role, employeeId: str
   };
   return { ...state, adjustments: [...state.adjustments, adjustment] };
 }
-export function reviewAdjustment(state: SkillState, role: Role, id: string, decision: 'approved' | 'rejected', remark: string, now = new Date()): SkillState {
+export function reviewAdjustment(
+  state: SkillState,
+  role: Role,
+  id: string,
+  decision: 'approved' | 'rejected',
+  remark: string,
+  managerScoresOrNow?: Record<string, SkillLevel> | Date,
+  maybeNow = new Date()
+): SkillState {
   if (role !== 'manager') throw new Error('เฉพาะผู้จัดการเท่านั้นที่อนุมัติได้');
   const adjustment = state.adjustments.find(a => a.id === id);
   if (!adjustment || adjustment.status !== 'pending') throw new Error('รายการนี้ได้รับการพิจารณาแล้วหรือไม่พบคำขอ');
   if (adjustment.submittedBy === ACTORS.manager.id || adjustment.employeeId === ACTORS.manager.employeeId)
     throw new Error('ไม่สามารถอนุมัติคำขอของตนเองได้');
   if (decision === 'rejected' && !remark.trim()) throw new Error('กรุณาระบุเหตุผลที่ไม่อนุมัติ');
+
+  const now = managerScoresOrNow instanceof Date ? managerScoresOrNow : maybeNow;
+  const managerScores =
+    managerScoresOrNow && !(managerScoresOrNow instanceof Date) && typeof managerScoresOrNow === 'object'
+      ? (managerScoresOrNow as Record<string, SkillLevel>)
+      : undefined;
+
   if (decision === 'approved') {
     if (adjustment.year !== bangkokYear(now)) throw new Error('คำขอข้ามปี กรุณาให้หัวหน้างานเสนอคะแนนใหม่สำหรับปีปัจจุบัน');
     const employee = employeesForYear(state, adjustment.year).find(e => e.id === adjustment.employeeId);
     if (!employee || adjustment.changes.some(c => (employee.scores[c.key] ?? 0) !== c.before))
       throw new Error('คะแนนปัจจุบันเปลี่ยนจากที่เสนอ กรุณาปฏิเสธและให้หัวหน้าเสนอใหม่');
   }
-  return { ...state, adjustments: state.adjustments.map(a => a.id === id ? {
-    ...a, status: decision, reviewedBy: ACTORS.manager.id, reviewedName: ACTORS.manager.name,
-    reviewedAt: now.toISOString(), remark: remark.trim(),
-  } : a) };
+
+  const updatedChanges = adjustment.changes.map(c => {
+    const finalScore = managerScores && managerScores[c.key] !== undefined ? managerScores[c.key] : c.after;
+    return {
+      ...c,
+      proposedAfter: c.proposedAfter ?? c.after,
+      after: finalScore,
+    };
+  });
+
+  return {
+    ...state,
+    adjustments: state.adjustments.map(a =>
+      a.id === id
+        ? {
+            ...a,
+            changes: decision === 'approved' ? updatedChanges : a.changes,
+            status: decision,
+            reviewedBy: ACTORS.manager.id,
+            reviewedName: ACTORS.manager.name,
+            reviewedAt: now.toISOString(),
+            remark: remark.trim(),
+          }
+        : a
+    ),
+  };
 }

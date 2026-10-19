@@ -37,6 +37,35 @@ test('pending changes never affect scores; approval replaces rather than adds',(
   assert.equal(approved.adjustments[0].reviewedBy,'EMP-M01');
   assert.throws(() => core.reviewAdjustment(approved,'manager',approved.adjustments[0].id,'approved','',nextDay));
 });
+test('manager can modify scores 0-3 before approval and final score is persisted', () => {
+  const initial = baseline();
+  const pending = core.proposeAdjustment(
+    initial,
+    'chief',
+    'EMP001',
+    { 'QCW001-001_A': 2, 'QCW001-001_D': 2 },
+    'ขอปรับคะแนน',
+    '',
+    now
+  );
+  const approved = core.reviewAdjustment(
+    pending,
+    'manager',
+    pending.adjustments[0].id,
+    'approved',
+    'เห็นชอบปรับบางทักษะ',
+    { 'QCW001-001_A': 1, 'QCW001-001_D': 3 },
+    nextDay
+  );
+  assert.equal(employee(approved).scores['QCW001-001_A'], 1);
+  assert.equal(employee(approved).scores['QCW001-001_D'], 3);
+  const changeA = approved.adjustments[0].changes.find(c => c.key === 'QCW001-001_A');
+  assert.equal(changeA.proposedAfter, 2);
+  assert.equal(changeA.after, 1);
+  const changeD = approved.adjustments[0].changes.find(c => c.key === 'QCW001-001_D');
+  assert.equal(changeD.proposedAfter, 2);
+  assert.equal(changeD.after, 3);
+});
 test('reject retains existing values and records reason; can propose again',() => {
   const initial=baseline();
   const pending=core.proposeAdjustment(initial,'chief','EMP001',{'QCW001-001_A':0},'ประเมิน','',now);
