@@ -4,6 +4,7 @@ import { Field, inputClass, panelClass } from './Phase1Shared';
 import type { Employee } from '../data/phase1Core';
 import { sumSkills } from '../data/phase1Core';
 import { Pagination } from './Pagination';
+import { Avatar } from './Avatar';
 
 export default function PeopleDirectory({employees}:{employees:Employee[]}) {
   const [search,setSearch]=useState('');
@@ -38,8 +39,16 @@ export default function PeopleDirectory({employees}:{employees:Employee[]}) {
           <tr><th className="p-4">พนักงาน</th><th className="p-4">แผนก</th><th className="p-4">ตำแหน่ง</th><th className="p-4 text-right">คะแนนรวม</th></tr>
         </thead>
         <tbody>
-          {paginatedPeople.length ? paginatedPeople.map(e=><tr key={e.id} className="border-t border-slate-100">
-            <td className="p-4"><div className="font-semibold">{e.name}</div><span className="text-xs text-slate-500">{e.id}</span></td>
+          {paginatedPeople.length ? paginatedPeople.map(e=><tr key={e.id} className="border-t border-slate-100 hover:bg-slate-50/50 transition-colors">
+            <td className="p-4">
+              <div className="flex items-center gap-3">
+                <Avatar src={e.avatarUrl} name={e.name} size="sm" />
+                <div>
+                  <div className="font-semibold text-slate-800">{e.name}</div>
+                  <span className="text-xs font-mono text-slate-500">{e.id}</span>
+                </div>
+              </div>
+            </td>
             <td className="p-4">{e.department}</td>
             <td className="p-4">{e.position}</td>
             <td className="p-4 text-right font-bold text-blue-800">{sumSkills(e)}</td>

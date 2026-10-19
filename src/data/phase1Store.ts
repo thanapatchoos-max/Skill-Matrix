@@ -54,7 +54,7 @@ export function decideSkillAdjustment(role: Role, id: string, decision: 'approve
   if (storageError) throw new Error(storageError);
   persist(reviewAdjustment(latest, role, id, decision, remark));
 }
-export function saveSkillEmployee(role: Role, profile: Pick<Employee, 'id' | 'name' | 'position' | 'department'> & { assignedSkills: string[] }) {
+export function saveSkillEmployee(role: Role, profile: Pick<Employee, 'id' | 'name' | 'position' | 'department'> & { assignedSkills: string[]; avatarUrl?: string }) {
   if (storageError) throw new Error(storageError);
   const latest=readState();
   if (storageError) throw new Error(storageError);

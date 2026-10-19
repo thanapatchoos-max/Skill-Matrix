@@ -8,9 +8,10 @@ export interface Employee {
   id: string; name: string; role: string; position: string; department: string;
   scores: Record<string, number>; assignedSkills: string[];
   teamId?: string; supervisorId?: string;
+  avatarUrl?: string;
 }
 
-export function saveEmployeeProfile(state: SkillState, role: Role, profile: Pick<Employee, 'id' | 'name' | 'position' | 'department'> & { assignedSkills: string[] }, now = new Date()): SkillState {
+export function saveEmployeeProfile(state: SkillState, role: Role, profile: Pick<Employee, 'id' | 'name' | 'position' | 'department'> & { assignedSkills: string[]; avatarUrl?: string }, now = new Date()): SkillState {
   if (role !== 'admin') throw new Error('เฉพาะผู้ดูแลระบบเท่านั้นที่จัดการข้อมูลพนักงานได้');
   if (!profile.id.trim() || !profile.name.trim() || !profile.position.trim() || !SKILL_DEPARTMENTS.includes(profile.department))
     throw new Error('กรุณากรอกข้อมูลพนักงานให้ครบถ้วน');
@@ -21,7 +22,7 @@ export function saveEmployeeProfile(state: SkillState, role: Role, profile: Pick
     throw new Error('กรุณาพิจารณาคำขอปรับคะแนนที่ค้างอยู่ก่อนย้ายแผนก');
   const validKeys=SKILL_WIS.filter(w => w.department === profile.department).flatMap(w => w.types.map(t => `${w.code}_${t.code}`));
   if (profile.assignedSkills.some(key => !validKeys.includes(key))) throw new Error('สกิลที่มอบหมายต้องอยู่ในแผนกของพนักงาน');
-  const updated: Employee = { ...employee, ...profile, name: profile.name.trim(), position: profile.position.trim(), role: employee?.role ?? 'Staff', scores: employee?.scores ?? {} };
+  const updated: Employee = { ...employee, ...profile, name: profile.name.trim(), position: profile.position.trim(), role: employee?.role ?? 'Staff', scores: employee?.scores ?? {}, avatarUrl: profile.avatarUrl !== undefined ? profile.avatarUrl : employee?.avatarUrl };
   const nextEmployees=employee ? employees.map(e => e.id === profile.id ? updated : e) : [...employees,updated];
   return {...state,snapshots:[...state.snapshots.filter(s => s.year !== year),{year,employees:nextEmployees}]};
 }

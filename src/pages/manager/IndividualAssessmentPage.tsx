@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FilterBar } from '../../components/FilterBar';
-import { Building2, CalendarDays, UserRound } from 'lucide-react';
+import { Building2, CalendarDays } from 'lucide-react';
 import { bangkokYear, employeesForYear, SKILL_DEPARTMENTS } from '../../data/phase1Core';
 import { useSkillState } from '../../data/phase1Store';
 import { individualAssessment } from '../../data/skillAssessment';
@@ -11,6 +11,7 @@ import { individualReport } from '../../lib/assessmentReport';
 import { EmptyState, Field, inputClass, LevelBadge } from '../../components/Phase1Shared';
 import { AssessmentFormula, AssessmentHeader, AssessmentMetric, LevelLegend, ScoreProgress } from '../../components/AssessmentShared';
 import { assessmentPanel, scoreText } from '../../lib/assessmentFormat';
+import { Avatar } from '../../components/Avatar';
 
 export default function IndividualAssessmentPage({initialScope}:{initialScope?:ScoreAssessmentScope}) {
   const state=useSkillState();const currentYear=bangkokYear();
@@ -27,11 +28,27 @@ export default function IndividualAssessmentPage({initialScope}:{initialScope?:S
     <FilterBar title="ขอบเขตการประเมินรายบุคคล" onReset={()=>{setYear(currentYear);setDepartment('ALL');setEmployeeId('EMP001');}}>
       <Field label="ปีประเมิน"><select className={inputClass} value={year} onChange={event=>setYear(Number(event.target.value))}>{Array.from({length:4},(_,index)=>currentYear-index).map(value=><option key={value}>{value}</option>)}</select></Field>
       <Field label="แผนก"><select className={inputClass} value={department} onChange={event=>{setDepartment(event.target.value);setEmployeeId('');}}><option value="ALL">ทุกแผนก</option>{SKILL_DEPARTMENTS.map(value=><option key={value}>{value}</option>)}</select></Field>
-      <Field label="พนักงานที่ประเมิน"><select className={inputClass} value={employee?.id??''} onChange={event=>setEmployeeId(event.target.value)}>{people.map(person=><option key={person.id} value={person.id}>{person.id} · {person.name}</option>)}</select></Field>
+      <Field label="พนักงานที่ประเมิน">
+        <div className="relative">
+          <div className="pointer-events-none absolute inset-y-0 left-2.5 flex items-center z-10">
+            <Avatar src={employee?.avatarUrl} name={employee?.name} size="xs"/>
+          </div>
+          <select className={inputClass} style={{ paddingLeft: '2.75rem' }} value={employee?.id??''} onChange={event=>setEmployeeId(event.target.value)}>
+            {people.map(person=><option key={person.id} value={person.id}>{person.id} · {person.name}</option>)}
+          </select>
+        </div>
+      </Field>
     </FilterBar>
     {!result?<EmptyState>ไม่มีข้อมูลคะแนนสำหรับปีหรือแผนกที่เลือก</EmptyState>:<>
       <section className={`${assessmentPanel} flex flex-wrap items-center justify-between gap-5 border-l-4 border-l-blue-600 p-6`}>
-        <div className="flex items-center gap-4"><span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-700"><UserRound size={27}/></span><div><p className="mb-1 text-xs font-semibold text-blue-700">พนักงานที่ประเมิน · {employee!.id}</p><h2 className="text-xl font-bold text-slate-900">{employee!.name}</h2><p className="mt-1 text-sm text-slate-500">{employee!.position}</p></div></div>
+        <div className="flex items-center gap-4">
+          <Avatar src={employee!.avatarUrl} name={employee!.name} size="lg" className="ring-2 ring-white shadow-xs" />
+          <div>
+            <p className="mb-1 text-xs font-semibold text-blue-700">พนักงานที่ประเมิน · {employee!.id}</p>
+            <h2 className="text-xl font-bold text-slate-900">{employee!.name}</h2>
+            <p className="mt-1 text-sm text-slate-500">{employee!.position}</p>
+          </div>
+        </div>
         <div className="space-y-2 text-sm text-slate-500"><p className="flex items-center gap-2"><Building2 size={15}/>{employee!.department} · {team?.name??'ไม่ระบุทีม'}</p><p className="flex items-center gap-2"><CalendarDays size={15}/>ปีประเมิน {year} · {result.jobs.length} งาน / {result.rows.length} สกิล</p></div>
       </section>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
