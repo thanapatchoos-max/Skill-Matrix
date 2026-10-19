@@ -28,7 +28,8 @@ export function jobReportEmployees(employees: Employee[], role: string, departme
 
 // One-time additive migration for saved demo browsers; never replaces an existing person.
 export function populateTeamDemo<T extends SkillState & { teamDemoRevision?: number }>(state: T, examples: Employee[]) {
-  if ((state.teamDemoRevision ?? 0) >= 1) return state;
+  const needsExamples = state.snapshots.some(snapshot => examples.some(example => !snapshot.employees.some(employee => employee.id === example.id)));
+  if ((state.teamDemoRevision ?? 0) >= 1 && !needsExamples) return state;
   return { ...state, teamDemoRevision: 1, snapshots: state.snapshots.map(snapshot => ({ ...snapshot, employees: [
     ...snapshot.employees.map(employee => ({ ...employee, ...(employee.teamId === undefined && employee.supervisorId === undefined ? demoMembership(employee) : {}) })),
     ...examples.filter(example => !snapshot.employees.some(employee => employee.id === example.id)).map(example => ({ ...structuredClone(example), scores: Object.fromEntries(Object.entries(example.scores).map(([key, score]) => [key, Math.max(0, score - Math.max(0, 2026 - snapshot.year))])) })),

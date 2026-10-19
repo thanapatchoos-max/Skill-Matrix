@@ -60,3 +60,12 @@ export function saveSkillEmployee(role: Role, profile: Pick<Employee, 'id' | 'na
   if (storageError) throw new Error(storageError);
   persist(saveEmployeeProfile(latest,role,profile));
 }
+export function resetSkillDemoState() {
+  localStorage.removeItem(KEY);
+  const populated = populateSkillDemo(initialState());
+  localStorage.setItem(KEY, JSON.stringify(populated));
+  state = populated;
+  storageError = '';
+  listeners.forEach(listener => listener());
+}
+

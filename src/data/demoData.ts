@@ -4,7 +4,7 @@ import { bangkokDate } from './trainingCore';
 import type { TrainingRequest, TrainingStatus } from './trainingCore';
 import { populateTeamDemo } from './teamScope';
 
-export const DEMO_REVISION = 3;
+export const DEMO_REVISION = 4;
 export type DemoSkillState = SkillState & { demoRevision?: number; teamDemoRevision?: number };
 
 function teamExamples() {
@@ -17,10 +17,15 @@ function teamExamples() {
 
 // Merge once, preserving saved profiles, scores and decisions in existing browsers.
 export function populateSkillDemo(saved: DemoSkillState = initialState(), now = new Date()): DemoSkillState {
-  if ((saved.demoRevision ?? 0) >= DEMO_REVISION) return populateTeamDemo(saved, teamExamples());
   const year = bangkokYear(now);
   const baseline = initialState().snapshots[0].employees;
   const currentSnapshot = saved.snapshots.find(s => s.year === year);
+
+  if ((saved.demoRevision ?? 0) >= DEMO_REVISION) {
+    if (!currentSnapshot || currentSnapshot.employees.length >= baseline.length) {
+      return populateTeamDemo(saved, teamExamples());
+    }
+  }
   if (currentSnapshot) {
     const existingIds = new Set(currentSnapshot.employees.map(e => e.id));
     const toAdd = baseline.filter(e => !existingIds.has(e.id));

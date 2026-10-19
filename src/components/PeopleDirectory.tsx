@@ -24,9 +24,14 @@ export default function PeopleDirectory({employees}:{employees:Employee[]}) {
   }
 
   return <div className="space-y-4">
-    <FilterBar title="ค้นหาบุคลากร" onReset={()=>{setSearch('');setCurrentPage(1);}}>
-      <Field label="ค้นหาบุคลากร"><input className={inputClass} value={search} onChange={e=>handleSearchChange(e.target.value)} placeholder="รหัส ชื่อ หรือแผนก"/></Field>
-    </FilterBar>
+    <div className="flex items-center justify-between">
+      <FilterBar title="ค้นหาบุคลากร" onReset={()=>{setSearch('');setCurrentPage(1);}}>
+        <Field label="ค้นหาบุคลากร"><input className={inputClass} value={search} onChange={e=>handleSearchChange(e.target.value)} placeholder="รหัส ชื่อ หรือแผนก"/></Field>
+      </FilterBar>
+    </div>
+    <div className="flex items-center justify-between px-1 text-xs text-slate-500">
+      <span>ผลการค้นหา: <strong className="font-semibold text-slate-800">{totalPeople}</strong> คน</span>
+    </div>
     <div className={`${panelClass} overflow-x-auto`}>
       <table className="w-full text-left text-sm">
         <thead className="bg-slate-50">
