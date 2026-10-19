@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
 export interface PaginationProps {
@@ -26,10 +26,21 @@ export function Pagination({
   itemLabel = 'คน',
   className = '',
 }: PaginationProps) {
+  const [jumpPage, setJumpPage] = useState('');
   const effectivePageSize = pageSize ?? itemsPerPage ?? 5;
   const calculatedTotalPages = Math.max(1, Math.ceil(totalItems / effectivePageSize));
   const totalPages = propTotalPages ?? calculatedTotalPages;
   const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+
+  const handleJump = (e: React.FormEvent) => {
+    e.preventDefault();
+    const pageNum = parseInt(jumpPage, 10);
+    if (!isNaN(pageNum)) {
+      const clamped = Math.max(1, Math.min(pageNum, totalPages));
+      onPageChange(clamped);
+      setJumpPage('');
+    }
+  };
 
   const startItem = totalItems === 0 ? 0 : (safeCurrentPage - 1) * effectivePageSize + 1;
   const endItem = Math.min(safeCurrentPage * effectivePageSize, totalItems);
@@ -93,81 +104,112 @@ export function Pagination({
         )}
       </div>
 
-      {/* Right: Navigation Controls */}
-      <div className="flex items-center gap-1">
-        {/* First Page */}
-        <button
-          type="button"
-          aria-label="หน้าแรกสุด"
-          title="หน้าแรกสุด"
-          disabled={safeCurrentPage <= 1}
-          onClick={() => onPageChange(1)}
-          className={navBtn}
-        >
-          <ChevronsLeft size={16} />
-          <span className="hidden md:inline ml-1">หน้าแรก</span>
-        </button>
+      {/* Right: Navigation Controls & Page Search/Jump */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-1">
+          {/* First Page */}
+          <button
+            type="button"
+            aria-label="หน้าแรกสุด"
+            title="หน้าแรกสุด"
+            disabled={safeCurrentPage <= 1}
+            onClick={() => onPageChange(1)}
+            className={navBtn}
+          >
+            <ChevronsLeft size={16} />
+            <span className="hidden md:inline ml-1">หน้าแรก</span>
+          </button>
 
-        {/* Previous Page */}
-        <button
-          type="button"
-          aria-label="ก่อนหน้า"
-          title="ก่อนหน้า"
-          disabled={safeCurrentPage <= 1}
-          onClick={() => onPageChange(Math.max(1, safeCurrentPage - 1))}
-          className={navBtn}
-        >
-          <ChevronLeft size={16} />
-          <span className="hidden md:inline ml-1">ก่อนหน้า</span>
-        </button>
+          {/* Previous Page */}
+          <button
+            type="button"
+            aria-label="ก่อนหน้า"
+            title="ก่อนหน้า"
+            disabled={safeCurrentPage <= 1}
+            onClick={() => onPageChange(Math.max(1, safeCurrentPage - 1))}
+            className={navBtn}
+          >
+            <ChevronLeft size={16} />
+            <span className="hidden md:inline ml-1">ก่อนหน้า</span>
+          </button>
 
-        {/* Page Numbers */}
-        <div className="flex items-center gap-1 mx-1">
-          {pages.map((p, idx) =>
-            typeof p === 'number' ? (
-              <button
-                key={`page-${p}`}
-                type="button"
-                aria-label={`หน้า ${p}`}
-                aria-current={safeCurrentPage === p ? 'page' : undefined}
-                onClick={() => onPageChange(p)}
-                className={pageBtn(safeCurrentPage === p)}
-              >
-                {p}
-              </button>
-            ) : (
-              <span key={`ellipsis-${idx}`} className="px-1 text-xs text-slate-400">
-                ...
-              </span>
-            )
-          )}
+          {/* Page Numbers */}
+          <div className="flex items-center gap-1 mx-1">
+            {pages.map((p, idx) =>
+              typeof p === 'number' ? (
+                <button
+                  key={`page-${p}`}
+                  type="button"
+                  aria-label={`หน้า ${p}`}
+                  aria-current={safeCurrentPage === p ? 'page' : undefined}
+                  onClick={() => onPageChange(p)}
+                  className={pageBtn(safeCurrentPage === p)}
+                >
+                  {p}
+                </button>
+              ) : (
+                <span key={`ellipsis-${idx}`} className="px-1 text-xs text-slate-400">
+                  ...
+                </span>
+              )
+            )}
+          </div>
+
+          {/* Next Page */}
+          <button
+            type="button"
+            aria-label="ถัดไป"
+            title="ถัดไป"
+            disabled={safeCurrentPage >= totalPages}
+            onClick={() => onPageChange(Math.min(totalPages, safeCurrentPage + 1))}
+            className={navBtn}
+          >
+            <span className="hidden md:inline mr-1">ถัดไป</span>
+            <ChevronRight size={16} />
+          </button>
+
+          {/* Last Page */}
+          <button
+            type="button"
+            aria-label="หน้าหลังสุด"
+            title="หน้าหลังสุด"
+            disabled={safeCurrentPage >= totalPages}
+            onClick={() => onPageChange(totalPages)}
+            className={navBtn}
+          >
+            <span className="hidden md:inline mr-1">หน้าหลังสุด</span>
+            <ChevronsRight size={16} />
+          </button>
         </div>
 
-        {/* Next Page */}
-        <button
-          type="button"
-          aria-label="ถัดไป"
-          title="ถัดไป"
-          disabled={safeCurrentPage >= totalPages}
-          onClick={() => onPageChange(Math.min(totalPages, safeCurrentPage + 1))}
-          className={navBtn}
-        >
-          <span className="hidden md:inline mr-1">ถัดไป</span>
-          <ChevronRight size={16} />
-        </button>
-
-        {/* Last Page */}
-        <button
-          type="button"
-          aria-label="หน้าหลังสุด"
-          title="หน้าหลังสุด"
-          disabled={safeCurrentPage >= totalPages}
-          onClick={() => onPageChange(totalPages)}
-          className={navBtn}
-        >
-          <span className="hidden md:inline mr-1">หน้าหลังสุด</span>
-          <ChevronsRight size={16} />
-        </button>
+        {/* Jump / Search Page Input (ช่องค้นหาหน้า / กระโดดไปหน้า) */}
+        {totalPages > 1 && (
+          <form
+            onSubmit={handleJump}
+            className="flex items-center gap-1.5 border-l border-slate-200 pl-2 sm:pl-3 text-xs text-slate-600"
+          >
+            <span className="text-slate-500 whitespace-nowrap">ไปหน้า:</span>
+            <input
+              type="number"
+              min={1}
+              max={totalPages}
+              placeholder={String(safeCurrentPage)}
+              value={jumpPage}
+              onChange={(e) => setJumpPage(e.target.value)}
+              aria-label="ค้นหาหรือระบุเลขหน้า"
+              className="w-14 rounded-md border border-slate-200 bg-white px-1.5 py-1 text-center text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+            <span className="text-slate-400">/{totalPages}</span>
+            <button
+              type="submit"
+              aria-label="ไปยังหน้าที่ระบุ"
+              title="ไปยังหน้าที่ระบุ"
+              className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100 hover:text-blue-600 transition-colors"
+            >
+              ไป
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

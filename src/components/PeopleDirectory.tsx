@@ -10,7 +10,7 @@ export default function PeopleDirectory({employees}:{employees:Employee[]}) {
   const [currentPage,setCurrentPage]=useState(1);
   const [pageSize,setPageSize]=useState(5);
 
-  const people=employees.filter(e=>`${e.name} ${e.id} ${e.department}`.toLowerCase().includes(search.toLowerCase()));
+  const people=employees.filter(e=>`${e.name} ${e.id} ${e.department} ${e.position}`.toLowerCase().includes(search.trim().toLowerCase()));
 
   const totalPeople = people.length;
   const totalPages = Math.max(1, Math.ceil(totalPeople / pageSize));
@@ -26,11 +26,11 @@ export default function PeopleDirectory({employees}:{employees:Employee[]}) {
   return <div className="space-y-4">
     <div className="flex items-center justify-between">
       <FilterBar title="ค้นหาบุคลากร" onReset={()=>{setSearch('');setCurrentPage(1);}}>
-        <Field label="ค้นหาบุคลากร"><input className={inputClass} value={search} onChange={e=>handleSearchChange(e.target.value)} placeholder="รหัส ชื่อ หรือแผนก"/></Field>
+        <Field label="ค้นหาบุคลากร"><input className={inputClass} value={search} onChange={e=>handleSearchChange(e.target.value)} placeholder="รหัส ชื่อ แผนก หรือตำแหน่ง"/></Field>
       </FilterBar>
     </div>
     <div className="flex items-center justify-between px-1 text-xs text-slate-500">
-      <span>ผลการค้นหา: <strong className="font-semibold text-slate-800">{totalPeople}</strong> คน</span>
+      <span>{search.trim() ? `ผลการค้นหา: ` : `บุคลากรทั้งหมด: `}<strong className="font-semibold text-slate-800">{totalPeople}</strong> คน{search.trim() ? ` (จาก ${employees.length} คน)` : ''}</span>
     </div>
     <div className={`${panelClass} overflow-x-auto`}>
       <table className="w-full text-left text-sm">

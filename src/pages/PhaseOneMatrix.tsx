@@ -15,7 +15,7 @@ export default function PhaseOneMatrix({userRole,individual=false,title}:{userRo
   const [currentPage,setCurrentPage]=useState(1);
   const [pageSize,setPageSize]=useState(5);
 
-  const employees=visibleEmployees(employeesForYear(state,bangkokYear()),userRole).filter(employee=>(department==='ALL'||employee.department===department)&&`${employee.id} ${employee.name}`.toLowerCase().includes(search.toLowerCase()));
+  const employees=visibleEmployees(employeesForYear(state,bangkokYear()),userRole).filter(employee=>(department==='ALL'||employee.department===department)&&`${employee.id} ${employee.name} ${employee.department} ${employee.position}`.toLowerCase().includes(search.trim().toLowerCase()));
   const selected=employees.find(employee=>employee.id===selectedId)??employees[0];
   const displayed=(individual?(selected?[selected]:[]):employees).filter(employee=>skillKeys(employee,wi,type,onDuty).length>0);
   const keys=[...new Set(displayed.flatMap(employee=>skillKeys(employee,wi,type,onDuty)))];
