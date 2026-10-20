@@ -145,3 +145,11 @@ test('Compare View allows comparison of employees and departments across year ra
   const chiefCompare = renderToStaticMarkup(React.createElement(Router, { page: 'chief-compare', role: 'chief', onNavigate() {} }));
   assert.ok(chiefCompare.includes('เปรียบเทียบทักษะ'));
 });
+
+test('Skill Matrix department view supports site candidate cards view and active filter badges', () => {
+  const department = renderToStaticMarkup(React.createElement(Router, { page: 'manager-section-skills', role: 'manager', onNavigate() {} }));
+  assert.ok(department.includes('การ์ดคัดเลือกคนไปไซต์'));
+  assert.ok(department.includes('มุมมองตารางเมทริกซ์'));
+  assert.ok(department.includes('รูปแบบการแสดงผล'));
+  assert.ok(department.includes('ทุกระดับ'));
+});
