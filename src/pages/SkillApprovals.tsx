@@ -152,8 +152,14 @@ export default function SkillApprovals({ userRole, title = 'อนุมัต�
                       <th className="p-3 text-center bg-blue-50/60 text-blue-900 border-x border-slate-200">
                         คะแนนที่หัวหน้าเสนอมา
                       </th>
-                      <th className="p-3 text-center bg-emerald-50/60 text-emerald-900">
-                        คะแนนสุดท้ายที่ Manager อนุมัติ
+                      <th
+                        className={`p-3 text-center ${
+                          a.status === 'rejected'
+                            ? 'bg-red-50/60 text-red-900'
+                            : 'bg-emerald-50/60 text-emerald-900'
+                        }`}
+                      >
+                        {a.status === 'rejected' ? 'ผลการพิจารณา' : 'คะแนนสุดท้ายที่ Manager อนุมัติ'}
                       </th>
                     </tr>
                   </thead>
@@ -174,7 +180,11 @@ export default function SkillApprovals({ userRole, title = 'อนุมัต�
                           <td className="p-3 text-center bg-blue-50/30 border-x border-slate-200">
                             <LevelBadge level={proposedScore} />
                           </td>
-                          <td className="p-3 text-center bg-emerald-50/30">
+                          <td
+                            className={`p-3 text-center ${
+                              a.status === 'rejected' ? 'bg-red-50/20' : 'bg-emerald-50/30'
+                            }`}
+                          >
                             {canEdit ? (
                               <div className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-1 shadow-2xs">
                                 {([0, 1, 2, 3] as SkillLevel[]).map(lvl => {
@@ -207,6 +217,12 @@ export default function SkillApprovals({ userRole, title = 'อนุมัต�
                                     แก้จาก L{proposedScore}
                                   </span>
                                 )}
+                              </div>
+                            ) : a.status === 'rejected' ? (
+                              <div className="inline-flex items-center justify-center gap-1.5">
+                                <span className="rounded-md bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700">
+                                  ไม่อนุมัติ (คงเดิม Level {c.before})
+                                </span>
                               </div>
                             ) : (
                               <div className="inline-flex items-center justify-center gap-2">
