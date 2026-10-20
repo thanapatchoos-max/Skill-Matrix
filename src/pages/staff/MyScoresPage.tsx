@@ -7,13 +7,46 @@ import { individualAssessment } from '../../data/skillAssessment';
 import { EmptyState, Field, inputClass, LevelBadge, Metric, panelClass } from '../../components/Phase1Shared';
 import { Avatar } from '../../components/Avatar';
 
+function DeltaBadge({ current, prev }: { current: number; prev: number | null | undefined }) {
+  if (prev === null || prev === undefined) {
+    return (
+      <span className="inline-flex items-center rounded bg-slate-50 px-2 py-0.5 text-xs text-slate-400 border border-slate-200">
+        ไม่มีข้อมูลเปรียบเทียบ
+      </span>
+    );
+  }
+  const delta = current - prev;
+  if (delta > 0) {
+    return (
+      <span className="inline-flex items-center rounded bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700 border border-emerald-200">
+        +{delta}
+      </span>
+    );
+  }
+  if (delta < 0) {
+    return (
+      <span className="inline-flex items-center rounded bg-red-50 px-2 py-0.5 text-xs font-bold text-red-700 border border-red-200">
+        {delta}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500 border border-slate-200">
+      0
+    </span>
+  );
+}
+
 export default function MyScoresPage() {
   const state = useSkillState();
+  const currentYear = bangkokYear();
+  const prevYear = currentYear - 1;
   const [wi, setWi] = useState('ALL');
   const [type, setType] = useState('ALL');
   const [level, setLevel] = useState('ALL');
   const [onDuty, setOnDuty] = useState(false);
-  const employee = employeesForYear(state, bangkokYear()).find(person => person.id === ACTORS.staff.employeeId);
+  const employee = employeesForYear(state, currentYear).find(person => person.id === ACTORS.staff.employeeId);
+  const prevEmployee = employeesForYear(state, prevYear).find(person => person.id === ACTORS.staff.employeeId);
   if (!employee) return <EmptyState>ยังไม่มีข้อมูลคะแนนของฉันในปีนี้</EmptyState>;
 
   const assessment = individualAssessment(employee);
@@ -36,7 +69,7 @@ export default function MyScoresPage() {
   return <div className="space-y-5">
     <div>
       <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-800"><User/>ดูคะแนนของฉัน</h1>
-      <p className="mt-1 text-sm text-slate-500">ดูคะแนนที่ยืนยันแล้วและทบทวนทักษะของตนเอง · ปี {bangkokYear()}</p>
+      <p className="mt-1 text-sm text-slate-500">ดูคะแนนที่ยืนยันแล้วและทบทวนทักษะของตนเอง · ปี {currentYear} (เปรียบเทียบผลต่างกับปี {prevYear})</p>
     </div>
     <div className={`${panelClass} flex flex-wrap items-center justify-between gap-4 p-5`}>
       <div className="flex items-center gap-4">
@@ -58,18 +91,30 @@ export default function MyScoresPage() {
       <Field label="ประเภทสกิล"><select className={inputClass} value={type} onChange={event => setType(event.target.value)}><option value="ALL">ทุกประเภท</option>{availableTypes.map(code => <option key={code} value={code}>Skill Type {code}</option>)}</select></Field>
       <Field label="ระดับสกิล"><select className={inputClass} value={level} onChange={event => setLevel(event.target.value)}><option value="ALL">ทุกระดับ</option>{LEVEL_LABELS.map((label, value) => <option key={value} value={value}>{value} · {label}</option>)}</select></Field>
     </FilterBar>
-    <div className="flex flex-wrap gap-4 text-xs text-slate-500">{LEVEL_LABELS.map((label, value) => <span key={value} className="flex items-center gap-2"><LevelBadge level={value}/>{label}</span>)}</div>
+    <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500">
+      <span className="font-semibold text-slate-600">ระดับสกิล:</span>
+      {LEVEL_LABELS.map((label, value) => <span key={value} className="flex items-center gap-1.5"><LevelBadge level={value}/>{label}</span>)}
+      <span className="text-slate-300">|</span>
+      <span className="font-semibold text-slate-600">คำอธิบายสัญลักษณ์:</span>
+      <span className="flex items-center gap-1.5"><span className="inline-flex items-center rounded bg-emerald-50 px-1.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200">+</span> เพิ่มขึ้น</span>
+      <span className="flex items-center gap-1.5"><span className="inline-flex items-center rounded bg-red-50 px-1.5 py-0.5 text-[11px] font-bold text-red-700 border border-red-200">-</span> ลดลง</span>
+      <span className="flex items-center gap-1.5"><span className="inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold text-slate-500 border border-slate-200">0</span> คงเดิม</span>
+      <span className="flex items-center gap-1.5"><span className="inline-flex items-center rounded bg-slate-50 px-1.5 py-0.5 text-[10px] font-mono text-slate-400 border border-slate-200">N/A</span> ไม่มีข้อมูลปีก่อน</span>
+    </div>
     <div className={`${panelClass} overflow-x-auto`}>
       <div className="border-b border-slate-100 p-5"><h2 className="font-bold text-slate-800">คะแนนของฉันแยกตาม Skill Type</h2><p className="mt-1 text-xs text-slate-500">แสดง {rows.length} จาก {assessment.rows.length} สกิล · รวมคะแนนปัจจุบันของแต่ละรายการ คะแนนเต็มรายการละ 3</p>{filtered && <p className="mt-2 text-xs font-medium text-blue-700">ยอดรวมในตารางคำนวณเฉพาะรายการที่แสดง ส่วนคะแนนรวมทั้งหมดด้านบนรวมทุกสกิล</p>}</div>
       <table className="w-full text-left text-sm">
-        <thead className="bg-slate-50 text-slate-600"><tr><th className="p-4">W/I</th><th className="p-4">ชื่องาน</th><th className="p-4">ประเภทสกิล</th><th className="p-4 text-center">คะแนนปัจจุบัน</th></tr></thead>
+        <thead className="bg-slate-50 text-slate-600"><tr><th className="p-4">W/I</th><th className="p-4">ชื่องาน</th><th className="p-4">ประเภทสกิล</th><th className="p-4 text-center">คะแนนปีก่อน ({prevYear})</th><th className="p-4 text-center">คะแนนปัจจุบัน</th><th className="p-4 text-center">ผลต่าง (Delta)</th></tr></thead>
         {groups.map(group => <tbody key={group.code}>
-          <tr className="border-t border-slate-200 bg-slate-50"><th scope="rowgroup" colSpan={4} className="px-4 py-3 text-blue-900">Skill Type {group.code} · {group.rows.length} สกิล</th></tr>
-          {group.rows.map(row => <tr key={row.key} data-skill-key={row.key} className="border-t border-slate-100"><td className="p-4 font-mono">{row.wiCode}</td><td className="p-4">{row.wiName}</td><td className="p-4">{row.type} · {row.typeName}</td><td className="p-4 text-center"><LevelBadge level={row.level}/></td></tr>)}
-          <tr data-type-total={group.code} className="border-t border-blue-100 bg-blue-50/60 font-semibold"><th scope="row" colSpan={3} className="p-4">รวม Skill Type {group.code}</th><td className="p-4 text-center text-blue-800">{group.total} / {group.rows.length * 3}</td></tr>
+          <tr className="border-t border-slate-200 bg-slate-50"><th scope="rowgroup" colSpan={6} className="px-4 py-3 text-blue-900">Skill Type {group.code} · {group.rows.length} สกิล</th></tr>
+          {group.rows.map(row => {
+            const prevScore = (prevEmployee && prevEmployee.scores && typeof prevEmployee.scores[row.key] === 'number') ? prevEmployee.scores[row.key] : null;
+            return <tr key={row.key} data-skill-key={row.key} className="border-t border-slate-100"><td className="p-4 font-mono font-medium">{row.wiCode}</td><td className="p-4">{row.wiName}</td><td className="p-4">{row.type} · {row.typeName}</td><td className="p-4 text-center">{prevScore !== null ? <LevelBadge level={prevScore}/> : <span className="font-mono text-xs text-slate-400">N/A</span>}</td><td className="p-4 text-center"><LevelBadge level={row.level}/></td><td className="p-4 text-center"><DeltaBadge current={row.level} prev={prevScore}/></td></tr>;
+          })}
+          <tr data-type-total={group.code} className="border-t border-blue-100 bg-blue-50/60 font-semibold"><th scope="row" colSpan={4} className="p-4">รวม Skill Type {group.code}</th><td className="p-4 text-center text-blue-800">{group.total} / {group.rows.length * 3}</td><td className="p-4"></td></tr>
         </tbody>)}
-        {!rows.length && <tbody><tr><td colSpan={4} className="p-8 text-center text-slate-500">ไม่พบสกิลตามตัวกรองที่เลือก ลองเลือกทุกประเภทหรือทุกระดับ</td></tr></tbody>}
-        <tfoot className="border-t-2 border-blue-200 bg-blue-100/70 font-bold text-blue-900"><tr data-score-total><th scope="row" colSpan={3} className="p-4">{filtered ? 'รวมคะแนนตามตัวกรอง' : 'รวมคะแนนทั้งหมด'} · {rows.length} สกิล</th><td className="p-4 text-center">{total} / {rows.length * 3}</td></tr></tfoot>
+        {!rows.length && <tbody><tr><td colSpan={6} className="p-8 text-center text-slate-500">ไม่พบสกิลตามตัวกรองที่เลือก ลองเลือกทุกประเภทหรือทุกระดับ</td></tr></tbody>}
+        <tfoot className="border-t-2 border-blue-200 bg-blue-100/70 font-bold text-blue-900"><tr data-score-total><th scope="row" colSpan={4} className="p-4">{filtered ? 'รวมคะแนนตามตัวกรอง' : 'รวมคะแนนทั้งหมด'} · {rows.length} สกิล</th><td className="p-4 text-center">{total} / {rows.length * 3}</td><td className="p-4"></td></tr></tfoot>
       </table>
     </div>
     <p className="text-xs leading-6 text-slate-500">ใช้ระดับสกิลและคะแนนรวมเพื่อทบทวนตนเอง หากต้องการพัฒนาสกิลที่ยังทำไม่ได้หรือต้องมีผู้ดูแล สามารถยื่นขอฝึกอบรมได้ คะแนนจะแสดงตามผลที่ผู้จัดการยืนยันแล้ว</p>

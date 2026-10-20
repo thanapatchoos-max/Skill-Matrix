@@ -4,7 +4,7 @@ import { bangkokDate } from './trainingCore';
 import type { TrainingRequest, TrainingStatus } from './trainingCore';
 import { populateTeamDemo } from './teamScope';
 
-export const DEMO_REVISION = 4;
+export const DEMO_REVISION = 5;
 export type DemoSkillState = SkillState & { demoRevision?: number; teamDemoRevision?: number };
 
 function teamExamples() {
@@ -20,8 +20,9 @@ export function populateSkillDemo(saved: DemoSkillState = initialState(), now = 
   const year = bangkokYear(now);
   const baseline = initialState().snapshots[0].employees;
   const currentSnapshot = saved.snapshots.find(s => s.year === year);
+  const hasHistorical = [year - 3, year - 2, year - 1].every(y => saved.snapshots.some(s => s.year === y));
 
-  if ((saved.demoRevision ?? 0) >= DEMO_REVISION) {
+  if ((saved.demoRevision ?? 0) >= DEMO_REVISION && hasHistorical) {
     if (!currentSnapshot || currentSnapshot.employees.length >= baseline.length) {
       return populateTeamDemo(saved, teamExamples());
     }

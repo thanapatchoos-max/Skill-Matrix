@@ -119,3 +119,11 @@ test('chief rejection, failed evaluation and manager rejection remain separate s
   assert.throws(()=>training.certifyTraining(passed,'manager',id,false,'',now));
   assert.equal(training.certifyTraining(passed,'manager',id,false,'ทบทวนหลักฐาน',now)[0].status,'rejected-manager');
 });
+
+test('Skill Matrix displays previous year score and delta badge or fallback',()=>{
+  const individual=renderToStaticMarkup(React.createElement(Router,{page:'manager-individual-scores',role:'manager',onNavigate(){}}));
+  assert.ok(individual.includes('ผลต่าง (Delta)'));
+  assert.ok(individual.includes('คะแนนปีก่อน'));
+  const department=renderToStaticMarkup(React.createElement(Router,{page:'manager-section-skills',role:'manager',onNavigate(){}}));
+  assert.ok(department.includes('แสดงผลต่างจากปีก่อน'));
+});
