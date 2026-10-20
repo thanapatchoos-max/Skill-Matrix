@@ -1,7 +1,7 @@
 import { FilterBar, FilterToggle } from '../../components/FilterBar';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { ArrowRight, BarChart3, ClipboardCheck, Users, TrendingUp, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, BarChart3, ClipboardCheck, Users, TrendingUp, ShieldAlert, CheckCircle2, GitCompare } from 'lucide-react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { bangkokYear, SKILL_DEPARTMENTS } from '../../data/phase1Core';
 import { managerAnalytics } from '../../data/managerAnalytics';
@@ -28,7 +28,7 @@ export default function ExecutiveDashboard({onNavigate}:{onNavigate:(page:string
   function focusDepartment(entry:unknown){if(typeof entry!=='object'||!entry)return;const item=entry as {department?:string;payload?:{department?:string}};const name=item.payload?.department??item.department;if(name&&SKILL_DEPARTMENTS.includes(name))setDepartment(name);}
   const growth=data.growth===null?'ข้อมูลยังไม่พอสำหรับเทียบปีก่อน':`${data.growth>0?'+':''}${data.growth.toFixed(2)} คะแนน/คน เทียบปี ${year-1}`;
   return <div className="space-y-6">
-    <div className="flex flex-wrap items-center justify-between gap-4"><div><div className="mb-2 flex items-center gap-2 text-xs font-bold tracking-wider text-blue-700"><BarChart3 size={16}/>EXECUTIVE DASHBOARD</div><h1 className="text-2xl font-bold text-slate-800">ภาพรวมสำหรับผู้จัดการ</h1><p className="mt-1 text-sm text-slate-500">วิเคราะห์ความพร้อมบุคลากร แนวโน้มคะแนน และลำดับความสำคัญในการพัฒนา</p></div><div className="flex flex-wrap gap-2"><button className={buttonClass} onClick={()=>onNavigate('manager-assessment-individual',{year,department})}><ClipboardCheck size={16}/>ประเมินรายบุคคล</button><button className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-800" onClick={()=>onNavigate('manager-assessment-section',{year,department})}>ประเมินรายแผนก<ArrowRight size={15}/></button></div></div>
+    <div className="flex flex-wrap items-center justify-between gap-4"><div><div className="mb-2 flex items-center gap-2 text-xs font-bold tracking-wider text-blue-700"><BarChart3 size={16}/>EXECUTIVE DASHBOARD</div><h1 className="text-2xl font-bold text-slate-800">ภาพรวมสำหรับผู้จัดการ</h1><p className="mt-1 text-sm text-slate-500">วิเคราะห์ความพร้อมบุคลากร แนวโน้มคะแนน และลำดับความสำคัญในการพัฒนา</p></div><div className="flex flex-wrap gap-2"><button className={buttonClass} onClick={()=>onNavigate('manager-assessment-individual',{year,department})}><ClipboardCheck size={16}/>ประเมินรายบุคคล</button><button className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-800" onClick={()=>onNavigate('manager-assessment-section',{year,department})}>ประเมินรายแผนก<ArrowRight size={15}/></button><button className="inline-flex items-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-100" onClick={()=>onNavigate('manager-compare')}><GitCompare size={15}/>เปรียบเทียบทักษะ</button></div></div>
     <FilterBar title="ขอบเขตการวิเคราะห์" description="เลือกปีและแผนกที่ต้องการดูภาพรวม" onReset={()=>{setYear(currentYear);setDepartment('ALL');setOnDuty(true);}} footer={<><FilterToggle checked={onDuty} onChange={setOnDuty}>เฉพาะสกิลที่ได้รับมอบหมาย</FilterToggle><span className="text-xs leading-5 text-slate-500">{data.employees.length} คน · {data.cells} รายการสกิลในขอบเขต</span></>}>
       <Field label="ปี"><select className={inputClass} value={year} onChange={event=>setYear(Number(event.target.value))}>{Array.from({length:4},(_,index)=>currentYear-index).map(value=><option key={value}>{value}</option>)}</select></Field>
       <Field label="แผนก"><select className={inputClass} value={department} onChange={event=>setDepartment(event.target.value)}><option value="ALL">ทุกแผนก</option>{SKILL_DEPARTMENTS.map(value=><option key={value}>{value}</option>)}</select></Field>
@@ -59,7 +59,29 @@ export default function ExecutiveDashboard({onNavigate}:{onNavigate:(page:string
     <ChartCard title="สกิลที่ควรวางแผนพัฒนาเป็นลำดับแรก" description="ติดตามงานที่ไม่มีผู้ทำได้เอง พึ่งพาคนเดียว หรือยังไม่มีผู้สอน · ดู 8 รายการแรก" onDetails={()=>onNavigate('manager-section-skills')}>
       {data.risk.length?<div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="bg-slate-50 text-xs text-slate-500"><tr><th className="rounded-l-lg p-3">งาน / ประเภทสกิล</th><th className="p-3">แผนก</th><th className="p-3 text-right">ทำได้เอง (2–3)</th><th className="p-3 text-right">ผู้สอน (3)</th><th className="rounded-r-lg p-3">สิ่งที่ควรติดตาม</th></tr></thead><tbody>{data.risk.slice(0,8).map(row=><tr key={row.key} className="border-b border-slate-100"><td className="p-3"><p className="font-mono font-semibold text-slate-800">{row.wiCode} / {row.type}</p><p className="mt-1 max-w-md text-xs text-slate-500">{row.wiName}</p></td><td className="p-3 text-xs text-slate-600">{row.department}</td><td className="p-3 text-right font-semibold">{row.independent} / {row.people} คน</td><td className="p-3 text-right">{row.trainers} คน</td><td className="p-3"><span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${row.priority===0?'bg-red-50 text-red-700':row.priority===1?'bg-orange-50 text-orange-700':'bg-amber-50 text-amber-700'}`}>{row.label}</span></td></tr>)}</tbody></table></div>:<div className="rounded-xl bg-emerald-50 p-5 text-sm text-emerald-800">{data.cells?'ทุกสกิลในขอบเขตนี้มีผู้ทำงานได้เองมากกว่า 1 คนและมีผู้สอน':'ยังไม่มีข้อมูลสกิลในขอบเขตที่เลือก'}</div>}
     </ChartCard>
-    <div className="grid gap-4 md:grid-cols-2"><button onClick={()=>onNavigate('manager-skill-approvals')} className={`${panelClass} flex items-center justify-between gap-4 p-5 text-left hover:border-blue-300`}><div><p className="font-semibold text-slate-800">คะแนนสกิลรอผู้จัดการยืนยัน</p><p className="mt-1 text-xs text-slate-500">ตรวจข้อเสนอที่หัวหน้าแก้ไขจากหน้าคะแนนรายบุคคล</p></div><span className="flex items-center gap-3"><strong className="text-2xl text-blue-800">{data.pendingSkills}</strong><ArrowRight size={18} className="text-slate-400"/></span></button><button onClick={()=>onNavigate('manager-training-approvals')} className={`${panelClass} flex items-center justify-between gap-4 p-5 text-left hover:border-blue-300`}><div><p className="font-semibold text-slate-800">ผลฝึกอบรมรอผู้จัดการรับรอง</p><p className="mt-1 text-xs text-slate-500">ตรวจผลประเมินและหลักฐานที่หัวหน้าส่งมา</p></div><span className="flex items-center gap-3"><strong className="text-2xl text-blue-800">{data.pendingTraining}</strong><ArrowRight size={18} className="text-slate-400"/></span></button></div>
+    <div className="grid gap-4 md:grid-cols-3">
+      <button onClick={()=>onNavigate('manager-compare')} className={`${panelClass} flex items-center justify-between gap-4 p-5 text-left hover:border-blue-300`}>
+        <div>
+          <p className="font-semibold text-slate-800 flex items-center gap-2"><GitCompare size={17} className="text-blue-700"/>เปรียบเทียบทักษะ</p>
+          <p className="mt-1 text-xs text-slate-500">เลือกเทียบรายคน (A vs B) หรือรายแผนก ข้ามช่วงปีอิสระ</p>
+        </div>
+        <span className="flex items-center gap-2 text-xs font-semibold text-blue-700">เปิดดู<ArrowRight size={15}/></span>
+      </button>
+      <button onClick={()=>onNavigate('manager-skill-approvals')} className={`${panelClass} flex items-center justify-between gap-4 p-5 text-left hover:border-blue-300`}>
+        <div>
+          <p className="font-semibold text-slate-800">คะแนนสกิลรอผู้จัดการยืนยัน</p>
+          <p className="mt-1 text-xs text-slate-500">ตรวจข้อเสนอที่หัวหน้าแก้ไขจากหน้าคะแนนรายบุคคล</p>
+        </div>
+        <span className="flex items-center gap-3"><strong className="text-2xl text-blue-800">{data.pendingSkills}</strong><ArrowRight size={18} className="text-slate-400"/></span>
+      </button>
+      <button onClick={()=>onNavigate('manager-training-approvals')} className={`${panelClass} flex items-center justify-between gap-4 p-5 text-left hover:border-blue-300`}>
+        <div>
+          <p className="font-semibold text-slate-800">ผลฝึกอบรมรอผู้จัดการรับรอง</p>
+          <p className="mt-1 text-xs text-slate-500">ตรวจผลประเมินและหลักฐานที่หัวหน้าส่งมา</p>
+        </div>
+        <span className="flex items-center gap-3"><strong className="text-2xl text-blue-800">{data.pendingTraining}</strong><ArrowRight size={18} className="text-slate-400"/></span>
+      </button>
+    </div>
     <p className="text-xs leading-6 text-slate-500">ความพร้อมคิดจากสกิลระดับ 2–3 ÷ สกิลทั้งหมดในขอบเขต · ค่าเฉลี่ยรายปีคิดจากคะแนนรวม ÷ จำนวนคน · กราฟแสดงคะแนนที่ยืนยันแล้ว{data.unassigned>0?` · มี ${data.unassigned} คนที่ยังไม่มีสกิลในขอบเขตที่เลือก`:''}</p>
   </div>;
 }

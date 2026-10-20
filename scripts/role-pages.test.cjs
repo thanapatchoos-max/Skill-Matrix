@@ -127,3 +127,21 @@ test('Skill Matrix displays previous year score and delta badge or fallback',()=
   const department=renderToStaticMarkup(React.createElement(Router,{page:'manager-section-skills',role:'manager',onNavigate(){}}));
   assert.ok(department.includes('แสดงผลต่างจากปีก่อน'));
 });
+
+test('Compare View allows comparison of employees and departments across year range', () => {
+  assert.equal(nav.roleCanVisit('manager-compare', 'manager'), true);
+  assert.equal(nav.roleCanVisit('chief-compare', 'chief'), true);
+  assert.equal(nav.roleCanVisit('manager-compare', 'staff'), false);
+  assert.equal(nav.roleCanVisit('chief-compare', 'staff'), false);
+
+  const managerCompare = renderToStaticMarkup(React.createElement(Router, { page: 'manager-compare', role: 'manager', onNavigate() {} }));
+  assert.ok(managerCompare.includes('เปรียบเทียบทักษะ'));
+  assert.ok(managerCompare.includes('เปรียบเทียบพนักงาน'));
+  assert.ok(managerCompare.includes('เปรียบเทียบรายแผนก'));
+  assert.ok(managerCompare.includes('ปีต้นทาง'));
+  assert.ok(managerCompare.includes('ปีปลายทาง'));
+  assert.ok(managerCompare.includes('ตารางเปรียบเทียบ'));
+
+  const chiefCompare = renderToStaticMarkup(React.createElement(Router, { page: 'chief-compare', role: 'chief', onNavigate() {} }));
+  assert.ok(chiefCompare.includes('เปรียบเทียบทักษะ'));
+});

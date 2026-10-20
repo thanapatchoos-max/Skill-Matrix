@@ -1,5 +1,5 @@
 import type { Role } from './phase1Core';
-export interface RolePage { id:string; title:string; purpose:string; group:string; icon:'home'|'skills'|'yearly'|'request'|'approve'|'training'|'people'|'report'|'documents'|'settings'|'permissions'|'master'|'assessment' }
+export interface RolePage { id:string; title:string; purpose:string; group:string; icon:'home'|'skills'|'yearly'|'request'|'approve'|'training'|'people'|'report'|'documents'|'settings'|'permissions'|'master'|'assessment'|'compare' }
 const page=(id:string,title:string,purpose:string,group:string,icon:RolePage['icon']):RolePage=>({id,title,purpose,group,icon});
 export const ROLE_NAMES:Record<Role,string>={staff:'พื้นที่พนักงาน',chief:'พื้นที่หัวหน้างาน',manager:'พื้นที่ผู้จัดการ',admin:'พื้นที่ผู้ดูแลระบบ'};
 export const ROLE_PAGES:Record<Role,RolePage[]>={
@@ -17,6 +17,7 @@ export const ROLE_PAGES:Record<Role,RolePage[]>={
     page('chief-training-evaluation','บันทึกผลฝึกอบรม','กรอกผลประเมินและส่งให้ผู้จัดการรับรอง','การฝึกอบรมของทีม','training'),
     page('chief-individual-scores','ดูคะแนนรายบุคคล','ดูคะแนน Staff และแก้ไขแบบแมนนวลเพื่อส่งให้ผู้จัดการยืนยัน','ดูคะแนนสกิล','people'),
     page('chief-team-skills','ดูคะแนนรายแผนก','ดูระดับสกิลพนักงานในแผนกแบบอ่านอย่างเดียว','ดูคะแนนสกิล','skills'),
+    page('chief-compare','เปรียบเทียบทักษะ','เปรียบเทียบคะแนนระหว่างพนักงาน แผนก และช่วงปี','ดูคะแนนสกิล','compare'),
     page('chief-yearly','พัฒนาการของทีม','ติดตามแนวโน้มคะแนนและประวัติรายปี','ทักษะของทีม','yearly'),
     page('chief-job-summary','สรุปความสามารถทีมตามงาน','ตรวจความสามารถพนักงานแยกตาม W/I และ Type','ทักษะของทีม','report'),
     page('chief-team-directory','รายชื่อพนักงานในทีม','ตรวจข้อมูลพนักงานในแผนกของตนเอง','ข้อมูลทีม','people'),
@@ -27,6 +28,7 @@ export const ROLE_PAGES:Record<Role,RolePage[]>={
     page('manager-training-approvals','รับรองผลฝึกอบรม','พิจารณาผลประเมินที่หัวหน้าส่งมา','รายการรอพิจารณา','approve'),
     page('manager-individual-scores','ดูคะแนนรายบุคคล','ดูคะแนนรายบุคคลที่ยืนยันแล้วแบบอ่านอย่างเดียว','ดูคะแนนสกิล','people'),
     page('manager-section-skills','ดูคะแนนรายแผนก','ดูระดับสกิลของพนักงานในแผนกแบบอ่านอย่างเดียว','ดูคะแนนสกิล','skills'),
+    page('manager-compare','เปรียบเทียบทักษะ','เปรียบเทียบคะแนนระหว่างพนักงาน แผนก และช่วงปี','ดูคะแนนสกิล','compare'),
     page('manager-assessment-individual','ประเมินคะแนนรายบุคคล','รวมและสรุปคะแนนรายบุคคล พร้อมส่งออกเพื่อประกอบการประเมิน','ประเมินและสรุปคะแนน','assessment'),
     page('manager-assessment-section','ประเมินคะแนนรายแผนก','รวมคะแนนพนักงานและค่าเฉลี่ยรายแผนก พร้อมส่งออก','ประเมินและสรุปคะแนน','assessment'),
     page('manager-yearly','แนวโน้มทักษะรายแผนก','เปรียบเทียบพัฒนาการและประวัติรายปี','ภาพรวมและรายงาน','yearly'),

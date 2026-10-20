@@ -15,6 +15,7 @@ import IndividualAssessmentPage from './manager/IndividualAssessmentPage';
 import SectionAssessmentPage from './manager/SectionAssessmentPage';
 import ManagerTrainingApprovalsPage from './manager/TrainingApprovalsPage';
 import { AdminHomePage, AdminEmployeesPage, AdminMasterDataPage, AdminSkillAuditPage, AdminReportsPage, AdminSettingsPage, AdminPermissionsPage, AdminTrainingAuditPage } from './admin/AdminPages';
+import CompareView from './CompareView';
 
 export default function RolePageRouter({page,role,onNavigate,assessmentScope}:{page:string;role:string;onNavigate:(page:string,scope?:ScoreAssessmentScope)=>void;assessmentScope?:ScoreAssessmentScope}) {
   if(!roleCanVisit(page,role)) return <EmptyState>หน้านี้ไม่อยู่ในพื้นที่ของบทบาทที่เลือก</EmptyState>;
@@ -26,11 +27,11 @@ export default function RolePageRouter({page,role,onNavigate,assessmentScope}:{p
     'staff-training-results':<StaffTrainingResultsPage/>,
     'chief-home':<ChiefHomePage onNavigate={onNavigate}/>, 'chief-training-requests':<ChiefTrainingRequestsPage/>,
     'chief-training-evaluation':<ChiefTrainingEvaluationPage/>, 'chief-team-skills':<ChiefTeamSkillsPage/>,
-    'chief-individual-scores':<ChiefIndividualScoresPage/>, 'chief-yearly':<ChiefYearlyPage/>,
+    'chief-individual-scores':<ChiefIndividualScoresPage/>, 'chief-compare':<CompareView userRole="chief" title="เปรียบเทียบทักษะ"/>, 'chief-yearly':<ChiefYearlyPage/>,
     'chief-job-summary':<ChiefJobSummaryPage/>, 'chief-team-directory':<ChiefDirectoryPage/>,
     'manager-home':<ManagerHomePage onNavigate={onNavigate}/>, 'manager-skill-approvals':<ManagerSkillApprovalsPage/>,
     'manager-training-approvals':<ManagerTrainingApprovalsPage/>, 'manager-section-skills':<ManagerSectionSkillsPage/>,
-    'manager-individual-scores':<ManagerIndividualScoresPage/>,
+    'manager-individual-scores':<ManagerIndividualScoresPage/>, 'manager-compare':<CompareView userRole="manager" title="เปรียบเทียบทักษะ"/>,
     'manager-assessment-individual':<IndividualAssessmentPage initialScope={assessmentScope}/>, 'manager-assessment-section':<SectionAssessmentPage initialScope={assessmentScope}/>,
     'manager-yearly':<ManagerYearlyPage/>, 'manager-job-summary':<ManagerJobSummaryPage/>,
     'manager-people-directory':<ManagerDirectoryPage/>,

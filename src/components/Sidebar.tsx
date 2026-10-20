@@ -1,10 +1,25 @@
-import { LayoutDashboard, Database, BarChart2, Users, Grid, Settings, CheckSquare, ShieldCheck, BookOpen, CalendarDays, ClipboardEdit, GraduationCap, ClipboardCheck } from 'lucide-react';
+import { LayoutDashboard, Database, BarChart2, Users, Grid, Settings, CheckSquare, ShieldCheck, BookOpen, CalendarDays, ClipboardEdit, GraduationCap, ClipboardCheck, GitCompare } from 'lucide-react';
 import { ROLE_PAGES } from '../data/roleNavigation';
 import type { Role } from '../data/phase1Core';
 import { useSkillState } from '../data/phase1Store';
 import { useTrainingRequests } from '../data/trainingStore';
 
-const icons={home:LayoutDashboard,master:Database,report:BarChart2,people:Users,skills:Grid,settings:Settings,approve:CheckSquare,permissions:ShieldCheck,documents:BookOpen,yearly:CalendarDays,request:ClipboardEdit,training:GraduationCap,assessment:ClipboardCheck};
+const icons = {
+  home: LayoutDashboard,
+  master: Database,
+  report: BarChart2,
+  people: Users,
+  skills: Grid,
+  settings: Settings,
+  approve: CheckSquare,
+  permissions: ShieldCheck,
+  documents: BookOpen,
+  yearly: CalendarDays,
+  request: ClipboardEdit,
+  training: GraduationCap,
+  assessment: ClipboardCheck,
+  compare: GitCompare,
+};
 export default function Sidebar({currentPage,setCurrentPage,userRole}:{currentPage:string;setCurrentPage:(page:string)=>void;userRole:Role}) {
   const state=useSkillState();const training=useTrainingRequests();
   const pages=ROLE_PAGES[userRole];const groups=[...new Set(pages.map(p=>p.group))];
