@@ -18,57 +18,63 @@ function DeltaBadge({ current, prev }: { current: number; prev: number | null | 
   const delta = current - prev;
   if (delta > 0) {
     return (
-      <span className="inline-flex items-center rounded bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700 border border-emerald-200">
-        +{delta}
+      <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700 border border-emerald-200">
+        <span>↑</span>+{delta}
       </span>
     );
   }
   if (delta < 0) {
     return (
-      <span className="inline-flex items-center rounded bg-red-50 px-2 py-0.5 text-xs font-bold text-red-700 border border-red-200">
-        {delta}
+      <span className="inline-flex items-center gap-0.5 rounded-full bg-red-50 px-2 py-0.5 text-xs font-bold text-red-700 border border-red-200">
+        <span>↓</span>{delta}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500 border border-slate-200">
-      0
+    <span className="text-slate-400 text-xs font-medium">
+      – (เท่าเดิม)
     </span>
   );
 }
 
-function CompactDeltaBadge({ current, prev }: { current: number; prev: number | null | undefined }) {
-  if (prev === null || prev === undefined) {
-    return <span className="text-[10px] text-slate-400 font-mono" title="ไม่มีข้อมูลปีก่อนหน้า">N/A</span>;
+function ScoreCellWithDelta({
+  current,
+  prev,
+  showDelta = true,
+}: {
+  current: number;
+  prev: number | null | undefined;
+  showDelta?: boolean;
+}) {
+  const delta = prev !== null && prev !== undefined ? current - prev : null;
+
+  let tooltip = `Level ${current}: ${LEVEL_LABELS[current] ?? ''}`;
+  if (delta !== null && delta !== undefined) {
+    if (delta > 0) {
+      tooltip = `Level ${current} (เพิ่มขึ้น +${delta} จากปีก่อนที่ได้ Level ${prev})`;
+    } else if (delta < 0) {
+      tooltip = `Level ${current} (ลดลง ${delta} จากปีก่อนที่ได้ Level ${prev})`;
+    } else {
+      tooltip = `Level ${current} (คะแนนเท่าเดิมกับปีก่อน)`;
+    }
+  } else {
+    tooltip = `Level ${current} (ไม่มีข้อมูลปีก่อนหน้า)`;
   }
-  const delta = current - prev;
-  if (delta > 0) {
-    return (
-      <span
-        className="inline-flex items-center rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200"
-        title={`ปีก่อนหน้า: Level ${prev} (เพิ่มขึ้น +${delta})`}
-      >
-        +{delta}
-      </span>
-    );
-  }
-  if (delta < 0) {
-    return (
-      <span
-        className="inline-flex items-center rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-700 border border-red-200"
-        title={`ปีก่อนหน้า: Level ${prev} (ลดลง ${delta})`}
-      >
-        {delta}
-      </span>
-    );
-  }
+
   return (
-    <span
-      className="inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500 border border-slate-200"
-      title={`ปีก่อนหน้า: Level ${prev} (คงเดิม)`}
-    >
-      0
-    </span>
+    <div className="relative inline-flex items-center justify-center" title={tooltip}>
+      <LevelBadge level={current} />
+      {showDelta && delta !== null && delta > 0 && (
+        <span className="absolute -top-1.5 -right-2 inline-flex items-center justify-center rounded-full bg-emerald-600 px-1.5 py-0.5 text-[9px] font-extrabold text-white shadow-xs ring-2 ring-white leading-none">
+          +{delta}
+        </span>
+      )}
+      {showDelta && delta !== null && delta < 0 && (
+        <span className="absolute -top-1.5 -right-2 inline-flex items-center justify-center rounded-full bg-rose-600 px-1.5 py-0.5 text-[9px] font-extrabold text-white shadow-xs ring-2 ring-white leading-none">
+          {delta}
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -310,11 +316,25 @@ export default function PhaseOneMatrix({userRole,individual=false,title}:{userRo
       <span className="font-semibold text-slate-600">ระดับสกิล:</span>
       {LEVEL_LABELS.map((label,value)=><span key={value} className="flex items-center gap-1.5"><LevelBadge level={value}/>{label}</span>)}
       <span className="text-slate-300">|</span>
-      <span className="font-semibold text-slate-600">คำอธิบายสัญลักษณ์:</span>
-      <span className="flex items-center gap-1.5"><span className="inline-flex items-center rounded bg-emerald-50 px-1.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200">+</span> เพิ่มขึ้น</span>
-      <span className="flex items-center gap-1.5"><span className="inline-flex items-center rounded bg-red-50 px-1.5 py-0.5 text-[11px] font-bold text-red-700 border border-red-200">-</span> ลดลง</span>
-      <span className="flex items-center gap-1.5"><span className="inline-flex items-center rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold text-slate-500 border border-slate-200">0</span> คงเดิม</span>
-      <span className="flex items-center gap-1.5"><span className="inline-flex items-center rounded bg-slate-50 px-1.5 py-0.5 text-[10px] font-mono text-slate-400 border border-slate-200">N/A</span> ไม่มีข้อมูลปีก่อน</span>
+      <span className="font-semibold text-slate-600">ผลต่างเทียบปีก่อน:</span>
+      <span className="flex items-center gap-1.5">
+        <span className="relative inline-flex items-center justify-center">
+          <LevelBadge level={3} />
+          <span className="absolute -top-1.5 -right-2 inline-flex items-center justify-center rounded-full bg-emerald-600 px-1.5 py-0.5 text-[9px] font-extrabold text-white ring-2 ring-white leading-none">+1</span>
+        </span>
+        คะแนนเพิ่มขึ้น
+      </span>
+      <span className="flex items-center gap-1.5">
+        <span className="relative inline-flex items-center justify-center">
+          <LevelBadge level={2} />
+          <span className="absolute -top-1.5 -right-2 inline-flex items-center justify-center rounded-full bg-rose-600 px-1.5 py-0.5 text-[9px] font-extrabold text-white ring-2 ring-white leading-none">-1</span>
+        </span>
+        คะแนนลดลง
+      </span>
+      <span className="flex items-center gap-1.5">
+        <LevelBadge level={2} />
+        คะแนนเท่าเดิม (ไม่มีป้าย)
+      </span>
     </div>
 
     {individual && selected && (() => {
@@ -430,8 +450,7 @@ export default function PhaseOneMatrix({userRole,individual=false,title}:{userRo
                               <div className="text-[10px] text-slate-500 truncate">{item?.name}</div>
                             </div>
                             <div className="flex items-center gap-1.5 shrink-0">
-                              <LevelBadge level={currentScore} />
-                              {showDelta && <CompactDeltaBadge current={currentScore} prev={prevScore} />}
+                              <ScoreCellWithDelta current={currentScore} prev={prevScore} showDelta={showDelta} />
                             </div>
                           </div>
                         );
@@ -466,6 +485,6 @@ export default function PhaseOneMatrix({userRole,individual=false,title}:{userRo
           itemLabel="คน"
         />
       </div>
-    ):<div className={`${panelClass} overflow-x-auto`}><table className="w-full whitespace-nowrap text-sm"><thead className="bg-slate-50 text-slate-600"><tr><th className="p-4 text-left">พนักงาน</th>{keys.map(key=><th key={key} className="px-3 py-4 text-center text-xs">{key.slice(0,key.lastIndexOf('_'))}<br/>Type {key.slice(key.lastIndexOf('_')+1)}</th>)}</tr></thead><tbody>{paginatedPeople.map(employee=>{const prevEmp=prevEmployees.find(p=>p.id===employee.id);return <tr key={employee.id} className="border-t border-slate-100"><td className="p-4"><div className="flex items-center gap-3"><Avatar src={employee.avatarUrl} name={employee.name} size="sm"/><div><div className="font-semibold text-slate-800">{employee.name}</div><span className="text-xs text-slate-500">{employee.id} · {employee.department}</span></div></div></td>{keys.map(key=>{const hasSkill=skillKeys(employee,wi,type,onDuty).includes(key);if(!hasSkill)return <td key={key} className="px-3 py-3 text-center text-slate-300">—</td>;const currentScore=employee.scores[key]??0;const prevScore=(prevEmp&&prevEmp.scores&&typeof prevEmp.scores[key]==='number')?prevEmp.scores[key]:null;return <td key={key} className="px-3 py-3 text-center"><div className="inline-flex items-center justify-center gap-1.5"><LevelBadge level={currentScore}/>{showDelta&&<CompactDeltaBadge current={currentScore} prev={prevScore}/>}</div></td>;})}</tr>;})}</tbody></table><Pagination currentPage={safeCurrentPage} totalItems={totalPeople} pageSize={pageSize} onPageChange={setCurrentPage} onPageSizeChange={setPageSize} pageSizeOptions={[5, 10, 25, 50]} itemLabel="คน"/></div>}
+    ):<div className={`${panelClass} overflow-x-auto`}><table className="w-full whitespace-nowrap text-sm"><thead className="bg-slate-50 text-slate-600"><tr><th className="p-4 text-left">พนักงาน</th>{keys.map(key=><th key={key} className="px-3 py-4 text-center text-xs">{key.slice(0,key.lastIndexOf('_'))}<br/>Type {key.slice(key.lastIndexOf('_')+1)}</th>)}</tr></thead><tbody>{paginatedPeople.map(employee=>{const prevEmp=prevEmployees.find(p=>p.id===employee.id);return <tr key={employee.id} className="border-t border-slate-100"><td className="p-4"><div className="flex items-center gap-3"><Avatar src={employee.avatarUrl} name={employee.name} size="sm"/><div><div className="font-semibold text-slate-800">{employee.name}</div><span className="text-xs text-slate-500">{employee.id} · {employee.department}</span></div></div></td>{keys.map(key=>{const hasSkill=skillKeys(employee,wi,type,onDuty).includes(key);if(!hasSkill)return <td key={key} className="px-3 py-3 text-center text-slate-300">—</td>;const currentScore=employee.scores[key]??0;const prevScore=(prevEmp&&prevEmp.scores&&typeof prevEmp.scores[key]==='number')?prevEmp.scores[key]:null;return <td key={key} className="px-3 py-3 text-center"><ScoreCellWithDelta current={currentScore} prev={prevScore} showDelta={showDelta}/></td>;})}</tr>;})}</tbody></table><Pagination currentPage={safeCurrentPage} totalItems={totalPeople} pageSize={pageSize} onPageChange={setCurrentPage} onPageSizeChange={setPageSize} pageSizeOptions={[5, 10, 25, 50]} itemLabel="คน"/></div>}
   </div>;
 }
